@@ -19,7 +19,8 @@ import { chromium } from "playwright";
 // ---------- types ----------
 
 export type CaptionPos = "top" | "center" | "bottom";
-export type AudioRole = "vo" | "music";
+/** vo ducks the music; sfx (room tone, a phone buzz) plays at its gain and ducks nothing. */
+export type AudioRole = "vo" | "music" | "sfx";
 
 export interface CardSpec {
   title: string;
@@ -28,7 +29,7 @@ export interface CardSpec {
 }
 
 export type Shot =
-  | { src: string; dur: number; in?: number; move?: "push" | "none"; fps?: number }
+  | { src: string; dur: number; in?: number; move?: "push" | "none"; fps?: number; look?: "phone" }
   | { card: CardSpec; dur: number };
 
 export interface Caption {
@@ -128,6 +129,7 @@ export function parseEditList(raw: unknown): EditList {
       if (s.in !== undefined && !(isNum(s.in) && s.in >= 0)) bad(`${w}.in`, "must be a number >= 0");
       if (s.move !== undefined && s.move !== "push" && s.move !== "none") bad(`${w}.move`, 'must be "push" or "none"');
       if (s.fps !== undefined && !(isNum(s.fps) && s.fps > 0 && s.fps <= 120)) bad(`${w}.fps`, "must be a number between 0 and 120");
+      if (s.look !== undefined && s.look !== "phone") bad(`${w}.look`, 'must be "phone"');
     });
   }
 
@@ -153,7 +155,7 @@ export function parseEditList(raw: unknown): EditList {
         if (typeof a.src !== "string" || a.src === "") bad(`${w}.src`, "must be a non-empty string");
         if (!(isNum(a.at) && a.at >= 0)) bad(`${w}.at`, "must be a number >= 0");
         if (a.gain !== undefined && !(isNum(a.gain) && a.gain >= 0)) bad(`${w}.gain`, "must be a number >= 0");
-        if (a.role !== undefined && a.role !== "vo" && a.role !== "music") bad(`${w}.role`, 'must be "vo" or "music"');
+        if (a.role !== undefined && a.role !== "vo" && a.role !== "music" && a.role !== "sfx") bad(`${w}.role`, 'must be "vo", "music" or "sfx"');
         if (a.duckTo !== undefined && !(isNum(a.duckTo) && a.duckTo >= 0 && a.duckTo <= 1)) bad(`${w}.duckTo`, "must be a number between 0 and 1");
       });
   }
@@ -217,22 +219,33 @@ function shotFilter(shot: Shot, r: ResolvedShot, input: number, index: number, s
   const frames = Math.max(1, Math.round(shot.dur * fps));
   const tail = `fps=${fps},trim=duration=${n(shot.dur)},setpts=PTS-STARTPTS,format=yuv420p`;
   const pad = `tpad=stop_mode=clone:stop_duration=${n(shot.dur)}`;
+  // look "phone": footage that reads as shot on a phone, not rendered. A slight handheld drift (two slow sine waves per
+  // axis inside a 6 % overscan), a flatter, less saturated grade, and moving grain.
+  const look = "look" in shot && shot.look === "phone" ? `,${phoneLook(w, h)}` : "";
   let chain: string;
   if (r.kind === "image" && "move" in shot && shot.move === "push") {
     // Supersample 2x so the slow zoom does not stair-step, then zoompan down to the frame size.
     const z = `1+${n(PUSH_END_ZOOM - 1)}*on/${frames}`;
     chain = `scale=${w * 2}:${h * 2}:force_original_aspect_ratio=increase,crop=${w * 2}:${h * 2},zoompan=z='${z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${w}x${h}:fps=${fps},setsar=1,${tail}`;
   } else if (r.kind === "image") {
-    chain = `${cover},${tail}`;
+    chain = `${cover}${look},${tail}`;
   } else if (r.kind === "frames") {
     // Frame folders come through the concat demuxer on a 1/25 time base, which snaps 1/30 s steps to 0.04 s
     // (a frame dropped and one doubled every few frames). Re-time them from their index at their own rate.
     const rate = ("fps" in shot ? shot.fps : undefined) ?? fps;
     chain = `settb=1/90000,setpts=N/${n(rate)}/TB,${cover},${pad},${tail}`;
   } else {
-    chain = `${cover},${pad},${tail}`;
+    chain = `${cover},${pad}${look},${tail}`;
   }
   return `[${input}:v]${chain}[v${index}]`;
+}
+
+/** The phone look's filters for a w×h frame (see shotFilter). */
+export function phoneLook(w: number, h: number): string {
+  const a = Math.round(w * 0.006);
+  const x = `(iw-ow)/2+${a}*sin(2*PI*t*0.9)+${Math.round(a * 0.6)}*sin(2*PI*t*2.3)`;
+  const y = `(ih-oh)/2+${a}*cos(2*PI*t*0.7)+${Math.round(a * 0.5)}*sin(2*PI*t*1.9)`;
+  return `scale=${Math.round(w * 1.06 / 2) * 2}:${Math.round(h * 1.06 / 2) * 2},crop=${w}:${h}:x='${x}':y='${y}',eq=contrast=0.92:saturation=0.82:brightness=0.012,noise=alls=10:allf=t+u,setsar=1`;
 }
 
 /** Volume expression: 1 outside the voice-over windows, duckTo inside, with short ramps either side. */
@@ -309,7 +322,7 @@ export function buildFfmpegArgs(plan: RenderPlan, out: string): string[] {
     const mix = count === 1 ? "anull" : `amix=inputs=${count}:duration=first:dropout_transition=0,volume=${count}`;
     const afade = edit.fadeOut > 0 ? `,afade=t=out:st=${n(total - edit.fadeOut)}:d=${n(edit.fadeOut)}` : "";
     // Loudness for social feeds (they play at about -14 LUFS); loudnorm resamples, so back to 48 kHz after it.
-    filters.push(`${labels}${mix},alimiter=limit=0.95:level=disabled,${LOUDNORM},aresample=48000${afade}[aout]`);
+    filters.push(`${labels}${mix},alimiter=limit=0.95:level=disabled,${LOUDNORM},aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,alimiter=limit=0.84:level=disabled${afade}[aout]`);
   }
 
   args.push(

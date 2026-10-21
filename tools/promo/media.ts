@@ -15,7 +15,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadConfig, repoRoot } from "@sb/config";
 
-type Kind = "edit" | "i2v" | "i2vDraft" | "tts" | "music";
+type Kind = "edit" | "i2v" | "i2vDraft" | "tts" | "music" | "sfx";
 
 export interface Job {
   id: string;
@@ -32,7 +32,7 @@ export interface Job {
   /** tts: the line; voice: ElevenLabs voice name. */
   text?: string;
   voice?: string;
-  /** music: length in seconds. */
+  /** music and sfx: length in seconds. */
   seconds?: number;
 }
 
@@ -56,7 +56,7 @@ export const MODELS = JSON.parse(readFileSync(path.join(HERE, "models.json"), "u
 
 export function extension(kind: Kind): string {
   // Stable Audio answers with PCM WAV, ElevenLabs with MP3.
-  return kind === "edit" ? "jpg" : kind === "tts" ? "mp3" : kind === "music" ? "wav" : "mp4";
+  return kind === "edit" ? "jpg" : kind === "tts" || kind === "sfx" ? "mp3" : kind === "music" ? "wav" : "mp4";
 }
 
 /** USD for one job at the model's price; i2v includes the possible extra length. */
@@ -65,6 +65,7 @@ export function estimateUsd(job: Job, models = MODELS): number {
   if (job.kind === "edit") return m.usdPerImage ?? 0;
   if (job.kind === "i2v" || job.kind === "i2vDraft") return (m.usdPerSecond ?? 0) * ((job.duration ?? 5) + (m.extraSeconds ?? 0));
   if (job.kind === "tts") return ((m.usdPer1000Chars ?? 0) * (job.text ?? "").length) / 1000;
+  if (job.kind === "sfx") return (m.usdPerSecond ?? 0) * (job.seconds ?? 5);
   return m.usdPerAudio ?? 0;
 }
 
@@ -104,6 +105,8 @@ export function requestBody(job: Job, resolve: (ref: string) => string, models =
       return { ...m.params, text: job.text, ...(job.voice ? { voice: job.voice } : {}) };
     case "music":
       return { ...m.params, prompt: job.prompt, seconds_total: job.seconds ?? 30 };
+    case "sfx":
+      return { ...m.params, text: job.prompt, duration_seconds: job.seconds ?? 5 };
   }
 }
 

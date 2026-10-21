@@ -14,6 +14,7 @@ describe("promo media", () => {
     expect(estimateUsd({ id: "b", kind: "i2v", duration: 5 })).toBeCloseTo(MODELS.i2v.usdPerSecond! * (5 + MODELS.i2v.extraSeconds!));
     expect(estimateUsd({ id: "c", kind: "tts", text: "x".repeat(500) })).toBeCloseTo(MODELS.tts.usdPer1000Chars! / 2);
     expect(estimateUsd({ id: "d", kind: "music" })).toBeCloseTo(MODELS.music.usdPerAudio!);
+    expect(estimateUsd({ id: "e", kind: "sfx", seconds: 4 })).toBeCloseTo(MODELS.sfx.usdPerSecond! * 4);
   });
 
   it("keeps the plumber rough cut under the plan's €5", () => {

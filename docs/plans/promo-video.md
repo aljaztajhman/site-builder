@@ -91,3 +91,7 @@ Real customer footage (comes with the free beta, M7a, and beats everything here)
 - `tsx tools/promo/capture.ts reel|site --primer <trade> --out <dir> [--to <selector>]`: the homepage's phone reel with that trade swapped in, or its example site scrolled; frame-exact 1080×1920 JPEGs.
 - `pnpm promo:cut <edit.json> --assets <dir>`: the edit list to H.264/AAC MP4 (ffmpeg from @ffmpeg-installer), captions and card in the postavi.si fonts, music ducked under the voice, loudness −14 LUFS, plus a review strip.
 - Claude can't watch or hear video: it reviews frames (the strip, exact frames) and measures loudness. Motion, AI glitches between frames, the voice and the music are the owner's check on a phone.
+
+## Less-AI pass (owner 2026-10-21: options 3 and 5)
+
+Options shown to the owner: real footage of a real tradesperson (strongest), a real voice, phone-style AI shots, fewer full faces, real sound, a better final model. Tried first: phone style and sound. Keyframes regenerated as ordinary phone photos (eye level, deep focus, clutter, mixed light), clips prompted as handheld phone video, each people shot cut to about 2 s, `look: "phone"` in the cut (6 % overscan with a slow two-sine handheld drift, contrast 0.92, saturation 0.82, moving grain), room tone and effects on the action (kitchen drip, van, the tap on "Postavi stran", the phone buzz, the pencil). Result: plumber-30-phone.mp4, 27.6 s, −12.9 LUFS, peak −1.3 dB. €0.94.

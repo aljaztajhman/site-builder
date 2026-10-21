@@ -1,0 +1,36 @@
+{
+  "$comment": "Concept 1, less-AI pass (owner 2026-10-21, options 3 and 5): phone-style keyframes and clips (p-*) cut to about 2 s each, the phone look (grain, handheld drift, flat grade) on generated shots, room tone and sound effects on the action. Same story and voice as plumber-30.json. Assets in eval/runs/promo/plumber-30 (pass --assets).",
+  "size": [1080, 1920],
+  "fps": 30,
+  "shots": [
+    { "src": "p-clip-1b.mp4", "in": 0.5, "dur": 2.4, "look": "phone" },
+    { "src": "p-clip-1b.mp4", "in": 3.2, "dur": 1.8, "look": "phone" },
+    { "src": "p-clip-1c.mp4", "in": 0.5, "dur": 2.0, "look": "phone" },
+    { "src": "reel/frames", "fps": 30, "dur": 10 },
+    { "src": "site/frames", "fps": 30, "dur": 4 },
+    { "src": "p-clip-1a.mp4", "in": 1.0, "dur": 2.2, "look": "phone" },
+    { "src": "p-clip-1d.mp4", "in": 2.6, "dur": 2.0, "look": "phone" },
+    { "card": { "title": "postavi.si", "line": "Spletna stran v minuti.", "note": "Vizualije ustvarjene z AI. Podjetje v primeru je izmišljeno." }, "dur": 3.2 }
+  ],
+  "captions": [
+    { "at": 0.1, "dur": 2.2, "text": "Stranka vas išče na spletu.", "pos": "top" },
+    { "at": 2.4, "dur": 1.8, "text": "Ne najde vas. Pokliče drugega.", "pos": "top" },
+    { "at": 4.3, "dur": 1.8, "text": "Med malico, v kombiju.", "pos": "top" },
+    { "at": 20.3, "dur": 2.0, "text": "Tokrat pokliče vas.", "pos": "bottom" },
+    { "at": 22.5, "dur": 1.8, "text": "Nova stranka.", "pos": "bottom" }
+  ],
+  "audio": [
+    { "src": "vo-1b.mp3", "at": 0.3, "gain": 1.0, "role": "vo" },
+    { "src": "vo-2.mp3", "at": 6.3, "gain": 1.0, "role": "vo" },
+    { "src": "vo-3.mp3", "at": 11.6, "gain": 1.0, "role": "vo" },
+    { "src": "vo-4b.mp3", "at": 16.4, "gain": 1.0, "role": "vo" },
+    { "src": "vo-5.mp3", "at": 24.6, "gain": 1.0, "role": "vo" },
+    { "src": "music.wav", "at": 0, "gain": 0.2, "role": "music", "duckTo": 0.45 },
+    { "src": "sfx-kitchen.mp3", "at": 0, "gain": 0.45, "role": "sfx" },
+    { "src": "sfx-van.mp3", "at": 4.2, "gain": 0.4, "role": "sfx" },
+    { "src": "sfx-tap.mp3", "at": 9.3, "gain": 0.7, "role": "sfx" },
+    { "src": "sfx-buzz.mp3", "at": 20.6, "gain": 0.9, "role": "sfx" },
+    { "src": "sfx-pencil.mp3", "at": 22.45, "gain": 0.6, "role": "sfx" }
+  ],
+  "fadeOut": 0.6
+}

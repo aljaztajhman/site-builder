@@ -6,6 +6,7 @@ import {
   cardHtml,
   missingSources,
   parseEditList,
+  phoneLook,
   resolveDefaults,
   timeline,
   totalDuration,
@@ -73,7 +74,7 @@ describe("parseEditList", () => {
     expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], captions: [{ at: 0, dur: 0, text: "x" }] })).toThrow(/captions\[0\]\.dur/);
     expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], captions: [{ at: -1, dur: 1, text: "" }] })).toThrow(/at.*text|text.*at/s);
     expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], audio: [{ src: "a.mp3", at: 0, duckTo: 2 }] })).toThrow(/duckTo/);
-    expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], audio: [{ src: "a.mp3", at: 0, role: "sfx" }] })).toThrow(/role/);
+    expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], audio: [{ src: "a.mp3", at: 0, role: "fx" }] })).toThrow(/role/);
     expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], size: [1081, 1920] })).toThrow(/size/);
     expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1 }], fadeOut: 5 })).toThrow(/longer than the video/);
   });
@@ -149,7 +150,7 @@ describe("buildFfmpegArgs", () => {
   it("compensates amix's division and limits", () => {
     expect(g).toContain("amix=inputs=3:duration=first:dropout_transition=0,volume=3");
     expect(g).toContain("alimiter=limit=0.95");
-    expect(g).toContain("loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000");
+    expect(g).toContain("loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,alimiter=limit=0.84");
   });
 
   it("ducks the music while either voice-over plays, and only the music", () => {
@@ -226,5 +227,29 @@ describe("caption and card HTML", () => {
     expect(html).toContain("Linija");
     expect(html).toContain("Opomba");
     expect(cardHtml({ title: "Ime" })).not.toContain('class="si">');
+  });
+});
+
+describe("phone look and sound effects", () => {
+  it("adds the phone look to marked shots only", () => {
+    const e = base();
+    e.shots = [{ src: "clips/1a.mp4", dur: 2, look: "phone" }, { src: "clips/1b.mp4", dur: 2 }];
+    const g = graph(buildFfmpegArgs(plan(e), "out.mp4"));
+    const [first, second] = g.split(";").filter((l) => /^\[\d+:v\]/.test(l));
+    expect(first).toContain(phoneLook(1080, 1920));
+    expect(first).toContain("noise=alls=10:allf=t+u");
+    expect(second).not.toContain("noise=");
+  });
+
+  it("accepts sfx tracks and never ducks for them", () => {
+    const e = base();
+    e.audio = [
+      { src: "audio/buzz.mp3", at: 1, role: "sfx", gain: 0.8 },
+      { src: "audio/music.mp3", at: 0, gain: 0.25, role: "music", duckTo: 0.45 },
+    ];
+    expect(parseEditList(e).audio).toHaveLength(2);
+    const g = graph(buildFfmpegArgs({ ...plan(e), audioDurations: [1, 12] }, "out.mp4"));
+    expect(g).not.toContain("eval=frame");
+    expect(() => parseEditList({ shots: [{ src: "a.jpg", dur: 1, look: "film" }] })).toThrow(/look/);
   });
 });
