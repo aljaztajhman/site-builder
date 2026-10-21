@@ -1,5 +1,5 @@
 {
-  "$comment": "Concept 1 'Pod umivalnikom', rough cut media (docs/plans/promo-video.md). Keyframes keep one plumber: every plumber shot is an edit of the same reference still (1a-sink-2). Clips on H3 Max 768P. VO: one male voice, one file per line so each line can be placed on the timeline. Story (owner 2026-10-20): a customer searches, doesn't find him, calls someone else; he makes the site in the van; the site; next time his phone rings; evening, the job in his notebook.",
+  "$comment": "Concept 1 'Pod umivalnikom', rough cut media (docs/plans/promo-video.md). Keyframes keep one plumber: every plumber shot is an edit of the same reference still (1a-sink-2). Clips on H3 Max 768P. VO: one male voice, one file per line so each line can be placed on the timeline. Story (owner 2026-10-20): a customer searches, doesn't find him, calls someone else; he makes the site in the van; the site; next time his phone rings; evening, the job in his notebook. Phone look (owner 2026-10-21, option 3): p-* keyframes and clips in an ordinary-phone style, plus sound effects (option 5).",
   "out": "eval/runs/promo/plumber-30",
   "jobs": [
     {
@@ -97,6 +97,96 @@
       "kind": "music",
       "seconds": 32,
       "prompt": "Warm, hopeful background music for a short advert: fingerpicked acoustic guitar, soft piano, light shaker, gentle steady build, 96 BPM, major key, no vocals, clean ending."
+    },
+    {
+      "id": "p-key-1a",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "The same plumber (same face, short greying hair, stubble, grey t-shirt) lying half under a kitchen sink, working on a pipe with a wrench; his smartphone lies on the floor beside him, screen lit with an incoming call. Shot as an ordinary smartphone photo by someone standing nearby: eye-level, everything roughly in focus (no background blur), slightly crooked framing, mixed light with a cool window and a warm lamp, a bit of noise in the shadows, ordinary clutter, nothing posed or lit, not cinematic, no film look. Vertical 9:16. No text or lettering anywhere."
+    },
+    {
+      "id": "p-key-1b",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1b-caller-1.jpg"
+      ],
+      "prompt": "The same woman (same face, cardigan) at her kitchen table, looking at her phone, a towel and a bucket under the sink behind her. Shot as an ordinary smartphone photo by someone standing nearby: eye-level, everything roughly in focus (no background blur), slightly crooked framing, mixed light with a cool window and a warm lamp, a bit of noise in the shadows, ordinary clutter, nothing posed or lit, not cinematic, no film look. Vertical 9:16. No text or lettering anywhere."
+    },
+    {
+      "id": "p-key-1c",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "The same man (same face, short greying hair, stubble, grey t-shirt) in the driver's seat of a white work van at midday, a sandwich in paper on the dashboard, typing on his phone with his thumbs, seen from the passenger seat; the phone screen is not visible. Shot as an ordinary smartphone photo by someone standing nearby: eye-level, everything roughly in focus (no background blur), slightly crooked framing, mixed light with a cool window and a warm lamp, a bit of noise in the shadows, ordinary clutter, nothing posed or lit, not cinematic, no film look. Vertical 9:16. No text or lettering anywhere."
+    },
+    {
+      "id": "p-key-1d",
+      "kind": "edit",
+      "images": [
+        "eval/runs/promo/2026-10-20T20-16-28/1a-sink-2.jpg"
+      ],
+      "prompt": "The same man (same face, short greying hair, stubble), in a plain checked shirt, at his kitchen table in the evening, phone to his ear, writing in a paper notebook; plates pushed aside. Shot as an ordinary smartphone photo by someone standing nearby: eye-level, everything roughly in focus (no background blur), slightly crooked framing, mixed light with a cool window and a warm lamp, a bit of noise in the shadows, ordinary clutter, nothing posed or lit, not cinematic, no film look. Vertical 9:16. No text or lettering anywhere."
+    },
+    {
+      "id": "p-clip-1a",
+      "kind": "i2v",
+      "image": "p-key-1a",
+      "duration": 5,
+      "prompt": "The phone on the floor buzzes; he glances at it, can't reach it, and goes back to the pipe. Handheld smartphone video, the camera held by a person standing nearby, small natural movements, real-time speed, no slow motion, no camera moves, everyday and unstaged."
+    },
+    {
+      "id": "p-clip-1b",
+      "kind": "i2v",
+      "image": "p-key-1b",
+      "duration": 5,
+      "prompt": "She scrolls on her phone, frowns, then lifts it to her ear to call someone. Handheld smartphone video, the camera held by a person standing nearby, small natural movements, real-time speed, no slow motion, no camera moves, everyday and unstaged."
+    },
+    {
+      "id": "p-clip-1c",
+      "kind": "i2v",
+      "image": "p-key-1c",
+      "duration": 5,
+      "prompt": "He types on the phone with both thumbs, pauses, keeps typing. Handheld smartphone video, the camera held by a person standing nearby, small natural movements, real-time speed, no slow motion, no camera moves, everyday and unstaged."
+    },
+    {
+      "id": "p-clip-1d",
+      "kind": "i2v",
+      "image": "p-key-1d",
+      "duration": 5,
+      "prompt": "He listens on the phone, nods, writes a short note and smiles. Handheld smartphone video, the camera held by a person standing nearby, small natural movements, real-time speed, no slow motion, no camera moves, everyday and unstaged."
+    },
+    {
+      "id": "sfx-kitchen",
+      "kind": "sfx",
+      "seconds": 5,
+      "prompt": "Quiet kitchen room tone in the evening: a slow dripping tap into a metal bucket, distant fridge hum, no music, no voices."
+    },
+    {
+      "id": "sfx-van",
+      "kind": "sfx",
+      "seconds": 4,
+      "prompt": "Inside a parked work van at midday: muffled outside birds and a distant tractor, a paper wrapper rustling, no music, no voices."
+    },
+    {
+      "id": "sfx-buzz",
+      "kind": "sfx",
+      "seconds": 3,
+      "prompt": "A smartphone vibrating on a tiled floor, two short buzzes, close up, in a small kitchen with a faint water trickle."
+    },
+    {
+      "id": "sfx-pencil",
+      "kind": "sfx",
+      "seconds": 3,
+      "prompt": "A pencil writing quickly on paper in a quiet kitchen in the evening, close up, no music."
+    },
+    {
+      "id": "sfx-tap",
+      "kind": "sfx",
+      "seconds": 1,
+      "prompt": "A single soft finger tap on a phone screen, close up, dry."
     }
   ]
 }

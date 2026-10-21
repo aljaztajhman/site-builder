@@ -496,7 +496,9 @@ Promo video (owner switched to it 2026-10-20; plan docs/plans/promo-video.md; ce
 - [x] Step 2: storyboard stills: `pnpm promo:stills` (tools/promo, test tools/promo/test/stills.test.ts), 9 stills on nano-banana-2, €0.62, eval/runs/promo/2026-10-20T20-16-28/
 - [x] Owner approved the look; story of concept 1 corrected (being found by new customers, not missed calls)
 - [x] Step 3 for concept 1: rough cut eval/runs/promo/plumber-30/plumber-30-rough.mp4 (30.5 s, −14.7 LUFS). Tools: media.ts, capture.ts, cut.ts (`pnpm promo:cut`, @ffmpeg-installer/ffmpeg). €1.12 (4 keyframes, 4 clips, 7 VO lines, music)
-- [ ] Owner: watch the rough cut on a phone; notes on rhythm, voice, music, captions
+- [x] Less-AI pass (owner 2026-10-21, options 3 and 5): phone-style keyframes and clips, about 2 s per people shot, `look: "phone"` in promo:cut (grain, handheld drift, flat grade), sound effects (kind `sfx`, role `sfx`). eval/runs/promo/plumber-30/plumber-30-phone.mp4 (27.6 s), tools/promo/cuts/plumber-30b.json. €0.94
+- [ ] Owner: watch both cuts on a phone; notes on rhythm, voice, music, captions; say which look wins
+- [ ] The ringing phone's screen in the under-the-sink clip shows garbled lettering for about 2 s: crop it, blur it, or regenerate the shot
 - [ ] Step 4: finals on Kling 3 Pro after one test shot; two VO voices; music (€15–40; stop rule at €30 without the look)
 - [ ] Step 5: 15/30/60 s cuts, with and without VO, 1:1 variant, thumbnails, AI note; files in eval/promo/<date>/
 - [ ] Step 6 (owner): run the 15 s cut with two hooks for a week; Claude rebuilds the losing hook (≈ €5)
