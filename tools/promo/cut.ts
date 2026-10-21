@@ -219,8 +219,8 @@ function shotFilter(shot: Shot, r: ResolvedShot, input: number, index: number, s
   const frames = Math.max(1, Math.round(shot.dur * fps));
   const tail = `fps=${fps},trim=duration=${n(shot.dur)},setpts=PTS-STARTPTS,format=yuv420p`;
   const pad = `tpad=stop_mode=clone:stop_duration=${n(shot.dur)}`;
-  // look "phone": footage that reads as shot on a phone, not rendered. A slight handheld drift (two slow sine waves per
-  // axis inside a 6 % overscan), a flatter, less saturated grade, and moving grain.
+  // look "phone": footage that reads as shot on a phone, not rendered. A faint handheld drift (two slow sine waves per
+  // axis, about 3 px, inside a 6 % overscan), a flatter, less saturated grade, and moving grain.
   const look = "look" in shot && shot.look === "phone" ? `,${phoneLook(w, h)}` : "";
   let chain: string;
   if (r.kind === "image" && "move" in shot && shot.move === "push") {
@@ -242,9 +242,10 @@ function shotFilter(shot: Shot, r: ResolvedShot, input: number, index: number, s
 
 /** The phone look's filters for a w×h frame (see shotFilter). */
 export function phoneLook(w: number, h: number): string {
-  const a = Math.round(w * 0.006);
-  const x = `(iw-ow)/2+${a}*sin(2*PI*t*0.9)+${Math.round(a * 0.6)}*sin(2*PI*t*2.3)`;
-  const y = `(ih-oh)/2+${a}*cos(2*PI*t*0.7)+${Math.round(a * 0.5)}*sin(2*PI*t*1.9)`;
+  // Half of the first try (owner 2026-10-21: "a bit too much wobble"); the clips carry some handheld motion of their own.
+  const a = Math.max(1, Math.round(w * 0.003));
+  const x = `(iw-ow)/2+${a}*sin(2*PI*t*0.55)+${Math.max(1, Math.round(a * 0.5))}*sin(2*PI*t*1.3)`;
+  const y = `(ih-oh)/2+${a}*cos(2*PI*t*0.45)+${Math.max(1, Math.round(a * 0.4))}*sin(2*PI*t*1.1)`;
   return `scale=${Math.round(w * 1.06 / 2) * 2}:${Math.round(h * 1.06 / 2) * 2},crop=${w}:${h}:x='${x}':y='${y}',eq=contrast=0.92:saturation=0.82:brightness=0.012,noise=alls=10:allf=t+u,setsar=1`;
 }
 
