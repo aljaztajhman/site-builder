@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   DomainProviderError,
+  UNCONFIGURED_EDGE,
   cloudflareEdge,
+  cloudflareEdgeFromEnv,
   createDb,
+  domainProvidersFor,
+  domainProvidersFromEnv,
   detectDnsHost,
   fakeDns,
   fakeEdge,
@@ -231,6 +235,72 @@ describe("Cloudflare adapter (skeleton, documented shapes)", () => {
     expect(f.seen[0]!.body).toEqual({ hostname: "www.a.si", ssl: { method: "http", type: "dv" } });
     expect(await cf.hostname("ch1")).toEqual({ status: "pending", certificate: "failed", errors: ["custom hostname does not CNAME to this zone.", "CAA blocks"] });
     expect(cf.cnameTarget).toBe("povezava.postavi.example");
+  });
+
+  it("finds a custom hostname that exists already, reads active_redeploying as serving and a blocked one as failed", async () => {
+    const f = fakeFetch({
+      "POST /client/v4/zones/saas/custom_hostnames": { success: false, errors: [{ code: 1406, message: "Duplicate custom hostname found." }], result: null },
+      "GET /client/v4/zones/saas/custom_hostnames?hostname=www.a.si": env([{ id: "ch7", hostname: "www.a.si", status: "pending" }]),
+      "GET /client/v4/zones/saas/custom_hostnames/ch7": env({ id: "ch7", status: "active_redeploying", ssl: { status: "active" } }),
+      "GET /client/v4/zones/saas/custom_hostnames/ch8": env({ id: "ch8", status: "pending_blocked", ssl: { status: "pending_validation" } }),
+    });
+    const cf = cloudflareEdge({ ...opts, fetch: f });
+    expect(await cf.addHostname("www.a.si")).toEqual({ id: "ch7" });
+    expect(await cf.hostname("ch7")).toEqual({ status: "active", certificate: "active", errors: [] });
+    expect(await cf.hostname("ch8")).toEqual({ status: "failed", certificate: "pending", errors: [] });
+  });
+
+  it("removes a custom hostname; one already gone is fine, a refused token is a permanent error", async () => {
+    const f = fakeFetch({ "DELETE /client/v4/zones/saas/custom_hostnames/ch1": env({ id: "ch1" }) });
+    const cf = cloudflareEdge({ ...opts, fetch: f });
+    await cf.removeHostname("ch1");
+    expect(f.seen.map((s) => [s.method, new URL(s.url).pathname])).toEqual([["DELETE", "/client/v4/zones/saas/custom_hostnames/ch1"]]);
+    await cf.removeHostname("gone"); // the fake answers 404 for unknown routes
+    const denied = (async () => new Response(JSON.stringify({ success: false, errors: [{ code: 10000, message: "Authentication error" }], result: null }), { status: 403 })) as unknown as typeof fetch;
+    const err = await cloudflareEdge({ ...opts, fetch: denied }).removeHostname("ch1").catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(DomainProviderError);
+    expect((err as DomainProviderError).permanent).toBe(true);
+    const unauthorized = (async () => new Response("{}", { status: 401 })) as unknown as typeof fetch;
+    expect(((await cloudflareEdge({ ...opts, fetch: unauthorized }).hostname("ch1").catch((e: unknown) => e)) as DomainProviderError).permanent).toBe(true);
+    const busy = (async () => new Response("{}", { status: 503 })) as unknown as typeof fetch;
+    expect(((await cloudflareEdge({ ...opts, fetch: busy }).hostname("ch1").catch((e: unknown) => e)) as DomainProviderError).permanent).toBe(false);
+  });
+
+  it("registered domains need the account id and the Worker's script (off until M7b)", async () => {
+    const cf = cloudflareEdge({ apiToken: "t", saasZoneId: "saas", cnameTarget: "povezava.postavi.si", fetch: fakeFetch({}) });
+    await expect(cf.addZone("a.si")).rejects.toThrow(/account id/);
+  });
+
+  it("is built from env (token and zone id); missing variables are named, never their values", async () => {
+    expect(cloudflareEdgeFromEnv({}, "povezava.postavi.si")).toEqual({ edge: null, missing: ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ZONE_ID"] });
+    expect(cloudflareEdgeFromEnv({ CLOUDFLARE_API_TOKEN: "secret", CLOUDFLARE_ZONE_ID: " " }, "povezava.postavi.si")).toEqual({ edge: null, missing: ["CLOUDFLARE_ZONE_ID"] });
+    const f = fakeFetch({ "POST /client/v4/zones/zone-1/custom_hostnames": env({ id: "ch1" }) });
+    const built = cloudflareEdgeFromEnv({ CLOUDFLARE_API_TOKEN: "secret", CLOUDFLARE_ZONE_ID: "zone-1" }, "povezava.postavi.si", { fetch: f });
+    expect(built.edge?.kind).toBe("cloudflare");
+    expect(built.edge?.cnameTarget).toBe("povezava.postavi.si");
+    await built.edge!.addHostname("www.a.si");
+    expect(f.seen[0]!.headers.authorization).toBe("Bearer secret");
+  });
+});
+
+describe("providers from config", () => {
+  const domains = (edge: "fake" | "cloudflare-saas") => ({ providers: { registrar: "fake" as const, edge, dns: "fake" as const }, connect: { cnameTarget: "povezava.postavi.si" } });
+
+  it("the fake edge points owners at config's CNAME target", () => {
+    const p = domainProvidersFor(domains("fake"));
+    expect(p.edge.kind).toBe("fake");
+    expect(p.edge.cnameTarget).toBe("povezava.postavi.si");
+    expect(p.registrar.kind).toBe("fake");
+  });
+
+  it("Cloudflare for SaaS without its env is an unconfigured edge whose calls fail transiently; with it, the real adapter", async () => {
+    const p = domainProvidersFromEnv(domains("cloudflare-saas"), {});
+    expect(p.edge.kind).toBe(UNCONFIGURED_EDGE);
+    const err = (await p.edge.addHostname("www.a.si").catch((e: unknown) => e)) as DomainProviderError;
+    expect(err).toBeInstanceOf(DomainProviderError);
+    expect(err.permanent).toBe(false);
+    expect(err.message).toContain("CLOUDFLARE_API_TOKEN");
+    expect(domainProvidersFromEnv(domains("cloudflare-saas"), { CLOUDFLARE_API_TOKEN: "t", CLOUDFLARE_ZONE_ID: "z" }).edge.kind).toBe("cloudflare");
   });
 });
 

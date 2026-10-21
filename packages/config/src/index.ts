@@ -178,14 +178,20 @@ export function upgradeQuote(
 /**
  * Own domains (docs/plans/custom-domains.md). Prices are what the owner is shown per year, VAT included;
  * `maxCostEur` is the most we pay the registrar for a name, so a premium or repriced name is never offered.
- * Only the in-memory fakes are wired: the Openprovider and Cloudflare adapters exist but no config selects them.
+ * Two switches (owner, 2026-10-19): `connect` lets an owner connect a domain they already have (Cloudflare
+ * for SaaS), `register` lets them buy one through us (Openprovider; off until paid plans, M7b). The registrar
+ * is only ever the in-memory fake; the edge is the fake or Cloudflare for SaaS (`CLOUDFLARE_API_TOKEN`,
+ * `CLOUDFLARE_ZONE_ID`, docs/dev/domains.md).
  */
-const Domains = z.object({
-  /** Shows the domain step when publishing. Off on a deployed app until real providers are wired. */
-  enabled: z.boolean(),
+const DomainsShape = z.object({
+  /** "Že imam domeno": the owner points their www at `cnameTarget` and we add it as a custom hostname. */
+  connect: z.strictObject({ enabled: z.boolean(), cnameTarget: z.string().regex(/^(?!-)[a-z0-9-]+(\.[a-z0-9-]+)+$/) }),
+  /** Buying a name through our registrar. While off: no suggestions, no register requests, no registrar calls. */
+  register: z.strictObject({ enabled: z.boolean() }),
   providers: z.object({
     registrar: z.enum(["fake"]),
-    edge: z.enum(["fake"]),
+    /** "cloudflare-saas" needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID; without them connecting stays unavailable. */
+    edge: z.enum(["fake", "cloudflare-saas"]),
     /** "system" asks real DNS (free, no account); "fake" answers as if the owner's records were in place (dev). */
     dns: z.enum(["fake", "system"]),
   }),
@@ -212,6 +218,29 @@ const Domains = z.object({
   /** The owner's "your domain is live" email, sent by the web process. */
   notify: z.object({ everyMinutes: z.number().int().min(1), maxAttempts: z.number().int().min(1).max(10) }),
 });
+
+/** The CNAME target before `connect.cnameTarget` existed (the fake edge's default). */
+const LEGACY_CNAME_TARGET = "povezava.postavi.example";
+
+/**
+ * Config files before 2026-10-21 had one switch, `domains.enabled`, for both connecting and registering.
+ * It becomes `connect.enabled` and `register.enabled` with the same value; a file with the new keys is left as it is.
+ */
+export function migrateDomainsConfig(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
+  const { enabled, ...rest } = raw as Record<string, unknown>;
+  if (enabled === undefined) return raw;
+  return { ...rest, connect: rest.connect ?? { enabled, cnameTarget: LEGACY_CNAME_TARGET }, register: rest.register ?? { enabled } };
+}
+
+const Domains = z.preprocess(migrateDomainsConfig, DomainsShape);
+
+/** Which ways to a site's own domain are on in config. `any`: the domain step can show. */
+export function domainModes(c: { domains: { connect: { enabled: boolean }; register: { enabled: boolean } } }): { connect: boolean; register: boolean; any: boolean } {
+  const connect = c.domains.connect.enabled;
+  const register = c.domains.register.enabled;
+  return { connect, register, any: connect || register };
+}
 
 const OutsideReviewer = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9-]{0,20}$/),

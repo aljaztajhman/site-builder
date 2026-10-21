@@ -22,6 +22,14 @@ Hostname layout: `postavi.si` and `www.postavi.si` are the homepage (infra/comin
 the app (APP_URL), `<slug>.postavi.si` published sites (PLATFORM_DOMAIN=postavi.si, through this Worker),
 `mail.postavi.si` Resend sending. Customers' own domains reach the Worker through Cloudflare for SaaS.
 
+## Customers' own domains (Cloudflare for SaaS)
+
+A request for a custom hostname (`www.pekarna.si`, CNAME to the fallback origin `povezava.postavi.si`) carries
+that hostname, not postavi.si, so the route `*.postavi.si/*` doesn't catch it: the zone needs a second,
+catch-all route **`*/*` → `postavi-edge`**. Nothing changes in the Worker: it forwards any hostname that
+isn't the platform's own, and its reserved-label check runs first, so the apex, `www.`, `app.`, `mail.`,
+`povezava.` and the other reserved names under postavi.si still answer 404. Setup steps: docs/dev/domains.md.
+
 ## Variables
 
 | Name | Where | What |

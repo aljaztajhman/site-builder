@@ -34,7 +34,7 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFor, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFromEnv, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
@@ -254,7 +254,7 @@ export interface WorkerOptions {
 export async function startWorker(platform: Platform, config = loadConfig(), jobs: Partial<WorkerJobs> = {}, opts: WorkerOptions = {}): Promise<WorkerHandle> {
   const { repo, storage, queue } = platform;
   const platformDomain = opts.platformDomain !== undefined ? opts.platformDomain : process.env.PLATFORM_DOMAIN || null;
-  const domainDeps = { repo, storage, config, platformDomain, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers) };
+  const domainDeps = { repo, storage, config, platformDomain, providers: opts.domainProviders ?? domainProvidersFromEnv(config.domains) };
   const run: WorkerJobs = { generateSite, applyChatEdit, describePhotos, checkUrl: checkUrlInBrowser, ...jobs };
   const timers: ReturnType<typeof setInterval>[] = [];
 

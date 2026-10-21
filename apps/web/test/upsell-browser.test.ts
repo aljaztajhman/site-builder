@@ -38,7 +38,7 @@ beforeAll(async () => {
   const queue: Queue = { send: async () => "job", work: async () => undefined, ping: async () => undefined, stop: async () => undefined };
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
   const base0 = loadConfig();
-  config = { ...base0, domains: { ...base0.domains, enabled: true } };
+  config = { ...base0, domains: { ...base0.domains, connect: { ...base0.domains.connect, enabled: true }, register: { enabled: true } } };
   const edge = fakeEdge();
   const app = createApp({ platform, config, mailer: mail, domainProviders: { registrar: fakeRegistrar(), edge, dns: fakeDns({}, { anyCnameTo: edge.cnameTarget }) }, auth: { password: "test-password-1234", secret: "s".repeat(32), secureCookies: false } });
   server = serve({ fetch: app.fetch, port: 0, hostname: "127.0.0.1" });

@@ -42,7 +42,7 @@ beforeAll(async () => {
   const db = await createDb("pglite://memory");
   await migrate(db);
   const base0 = loadConfig();
-  config = { ...base0, domains: { ...base0.domains, enabled: true } };
+  config = { ...base0, domains: { ...base0.domains, connect: { ...base0.domains.connect, enabled: true }, register: { enabled: true } } };
   const edge = fakeEdge();
   providers = { registrar: fakeRegistrar(), edge, dns: fakeDns({}, { anyCnameTo: edge.cnameTarget }) };
   const repo = new Repo(db);
@@ -172,6 +172,37 @@ describe("publish on the owner's own domain", () => {
       await expect.poll(async () => (await platform.repo.getSite(id))?.published_address, { timeout: 10_000 }).toBe("https://www.rebernik-instalacije.si/");
       results["connected-360"] = ui.taps();
     } finally {
+      await ui.close();
+    }
+  }, 90_000);
+
+  it("connect-only (registering off, the free beta): Objavi opens on 'Že imam domeno' alone, no names or prices to buy", async () => {
+    config.domains.register.enabled = false;
+    const id = await seed();
+    const ui = await open(id, 360);
+    const registrar = () => providers.registrar as ReturnType<typeof fakeRegistrar>;
+    const asked = registrar().calls.length;
+    try {
+      await ui.tap(ui.page.getByRole("button", { name: "Objavi", exact: true }));
+      const step = ui.page.locator("#domain-step");
+      await step.locator("input[name=own-domain]").waitFor();
+      expect(await step.locator(".domain-choices, #own-domain, .domain-holder, .domain-holder-form").count()).toBe(0);
+      expect(await step.textContent()).not.toMatch(/vključena|na leto|Izberi novo domeno/);
+      expect(await step.textContent()).toContain("Povežite domeno, ki jo že imate.");
+      const field = step.locator("input[name=own-domain]");
+      await ui.tap(field);
+      await field.fill("rebernik-samo-povezava.si");
+      await ui.tap(ui.page.locator("#own-domain-check"));
+      await ui.page.locator(".domain-own .dns-record").waitFor();
+      expect(await noSideScroll(ui.page)).toBe(true);
+      await shot(ui.page, "domain-connect-only-360");
+      await ui.tap(ui.page.locator("#domain-confirm"));
+      await expect.poll(async () => (await ui.page.locator("#domain-status").textContent()) ?? "", { timeout: 20_000 }).toContain("Objavljeno");
+      // Nothing was asked of the registrar (no suggestions while registering is off).
+      expect(registrar().calls.length).toBe(asked);
+      results["connect-only-360"] = ui.taps();
+    } finally {
+      config.domains.register.enabled = true;
       await ui.close();
     }
   }, 90_000);

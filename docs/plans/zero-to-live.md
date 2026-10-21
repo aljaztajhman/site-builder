@@ -34,7 +34,7 @@ By kind: prices 37 of 56 (7 fixtures), ZEPT provider data (legal name, tax and r
 
 1. **"Še to potrebujemo"**: when a generation the owner watched finishes with facts missing, the editor opens one screen with every missing fact as an open field (no "Vnesi"), the first one focused, a price named by its item ("Cenik › Pramene") and read the way owners write it ("12,50", "od 30"). Objavi under it saves what was typed and publishes; if a fact is still empty it says so and publishes nothing. "Še N do objave" and the top bar's Objavi open the same screen while facts are missing; anything else on the checklist is one tap away ("Pokaži"). A later visit doesn't push the screen.
 2. **Domain names asked while the site generates**: once the brief has named the business, the worker asks the registrar about the names (`warmDomainSuggestions`); the answer is kept on the site for `domains.suggestions.cacheMinutes` (60) and the domain step reuses it instead of asking again on every editor load (migration 20). A new business name asks again. Off with the rest of `domains` in config.
-3. **Publishing is one confirmation once the facts are in**: Objavi under the form is the confirmation. With `domains.enabled` the domain step follows (measured in custom-domains.md: 2 taps).
+3. **Publishing is one confirmation once the facts are in**: Objavi under the form is the confirmation. With own domains on (`domains.connect` or `domains.register`) the domain step follows (measured in custom-domains.md: 2 taps).
 
 ## What remains and why
 

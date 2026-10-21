@@ -88,7 +88,7 @@ describe("edge Worker", () => {
 
   it("never forwards the apex or the platform's own names (404, nothing fetched)", async () => {
     const { seen, fetcher } = recorder();
-    for (const host of ["postavi.si", "www.postavi.si", "app.postavi.si", "mail.postavi.si", "APP.postavi.si", "x.mail.postavi.si", "stranko.postavi.si"]) {
+    for (const host of ["postavi.si", "www.postavi.si", "app.postavi.si", "mail.postavi.si", "APP.postavi.si", "x.mail.postavi.si", "stranko.postavi.si", "povezava.postavi.si"]) {
       const r = await handle(new Request(`https://${host}/login`), env, fetcher);
       expect(r.status, host).toBe(404);
       expect(r.headers.get("x-robots-tag")).toBe("noindex, nofollow");

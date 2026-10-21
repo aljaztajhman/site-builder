@@ -34,7 +34,7 @@ import {
   type Operation,
   type Resolve,
 } from "@sb/engine";
-import { VersionConflictError, billingEnabled, contentType, domainProvidersFor, mailerFromEnv, newId, runningVersion, stripeFromEnv, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type StripeApi, type Tier } from "@sb/platform";
+import { VersionConflictError, billingEnabled, contentType, domainProvidersFromEnv, mailerFromEnv, newId, runningVersion, stripeFromEnv, type DomainProviders, type Mailer, type Platform, type RunningVersion, type SiteStatus, type StripeApi, type Tier } from "@sb/platform";
 import { renderPage, renderPath, sharedBundle, pageFile, notFoundPlacement, rebaseRelativeUrls } from "@sb/render";
 import { CollectionKind, addedOnRequest, blockerText, collectPlaceholders, markOwnerEdits, sectionDef, type SiteSpec } from "@sb/spec";
 import type { AuthSettings } from "./auth.ts";
@@ -97,7 +97,7 @@ export interface AppOptions {
   siteHostCacheMs?: number;
   /** SITE_PROXY_SECRET: the edge Worker's proof that its forwarded site hostname is real. */
   siteProxySecret?: string | null;
-  /** Registrar, edge and DNS for own domains; config `domains.providers` when not given (only fakes exist there). */
+  /** Registrar, edge and DNS for own domains; config `domains` when not given (Cloudflare for SaaS credentials from env). */
   domainProviders?: DomainProviders;
   /** The HTTP client the tax-number lookup asks EU VIES with (tests: a fake); global fetch when not given. */
   viesFetch?: typeof fetch;
@@ -266,7 +266,7 @@ export function createApp({ platform, config, auth, ...opts }: AppOptions): Hono
   const stats = statsCounter(repo, config, auth.secret);
   registerStatsRoutes(app, { repo, config, secret: auth.secret, counter: stats });
   // The domain step of publishing; provisioning runs in the worker (queue "domain").
-  const domainDeps = { repo, queue, config, providers: opts.domainProviders ?? domainProvidersFor(config.domains.providers), platformDomain: opts.platformDomain ?? null, appHosts };
+  const domainDeps = { repo, queue, config, providers: opts.domainProviders ?? domainProvidersFromEnv(config.domains), platformDomain: opts.platformDomain ?? null, appHosts };
   registerDomainRoutes(app, domainDeps);
   // The reminder before an anonymous preview is deleted: the visitor's address, and the email's link.
   registerReminderRoutes(app, { repo, config, secret: auth.secret, track });

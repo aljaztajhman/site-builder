@@ -7,7 +7,7 @@
 export const RESERVED_SITE_LABELS: readonly string[] = Object.freeze([
   "www", "app", "mail", "api", "admin", "dashboard", "static", "cdn", "assets", "status", "help", "pomoc", "podpora",
   "blog", "novice", "docs", "send", "bounce", "email", "smtp", "imap", "pop", "ftp", "ns", "ns1", "ns2", "dev", "test",
-  "staging", "preview", "demo", "postavi", "stranko", "_dmarc",
+  "staging", "preview", "demo", "postavi", "stranko", "povezava", "_dmarc",
 ]);
 
 const RESERVED = new Set(RESERVED_SITE_LABELS);

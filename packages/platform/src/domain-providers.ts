@@ -4,8 +4,9 @@ import { resolveCname, resolveMx, resolveNs } from "node:dns/promises";
  * The outside services a site's own domain needs (docs/plans/custom-domains.md): a registrar that sells
  * and registers names in the owner's name, the edge in front of every site (DNS zones, custom hostnames
  * and certificates), and DNS lookups of the owner's own records. Provisioning (packages/engine
- * provision.ts) talks only to these interfaces. Only the in-memory fakes below are wired (config
- * `domains.providers`); openprovider.ts and cloudflare-saas.ts are adapters for when the accounts exist.
+ * provision.ts) talks only to these interfaces. Config `domains.providers` selects them: the registrar is
+ * only the in-memory fake (openprovider.ts waits for paid plans, M7b); the edge is the fake or Cloudflare
+ * for SaaS (cloudflare-saas.ts, credentials from env).
  *
  * Every write is idempotent, because a provisioning step can run again after a crash between the
  * provider's answer and our record of it: registering a name already registered in our account answers
@@ -70,6 +71,8 @@ export interface EdgeHostnames {
   /** An owner's own hostname (custom hostname on our zone). Existing → that one. */
   addHostname(hostname: string): Promise<{ id: string }>;
   hostname(id: string): Promise<{ status: "pending" | "active" | "failed"; certificate: CertificateStatus; errors: string[] }>;
+  /** Removes an owner's own hostname (the site's domain was replaced). One already gone is fine. */
+  removeHostname(id: string): Promise<void>;
 }
 
 /** DNS answers about the owner's domain. No answer (no such name, no such record) is an empty list. */
@@ -280,6 +283,10 @@ export function fakeEdge(o: { cnameTarget?: string; nameservers?: string[]; scri
       const state = behave(script, counts, "hostname");
       return state === "ok" ? { status: "active", certificate: "active", errors: [] } : { status: "pending", certificate: "pending", errors: [] };
     },
+    async removeHostname(id) {
+      calls.push({ method: "removeHostname", args: [id] });
+      behave(script, counts, "removeHostname");
+    },
   };
 }
 
@@ -289,15 +296,37 @@ export interface DomainProviders {
   dns: DnsLookup;
 }
 
+/** `EdgeHostnames.kind` of an edge config selects but env doesn't configure: connecting is unavailable. */
+export const UNCONFIGURED_EDGE = "unconfigured";
+
+/** Stands in for a real edge whose credentials are missing: every call is a transient failure naming what's missing. */
+export function unconfiguredEdge(cnameTarget: string, missing: readonly string[]): EdgeHostnames {
+  const no = async (): Promise<never> => {
+    throw new DomainProviderError(`the edge is not configured: ${missing.join(", ")} not set`);
+  };
+  return { kind: UNCONFIGURED_EDGE, cnameTarget, addZone: no, zone: no, addHostname: no, hostname: no, removeHostname: no };
+}
+
 /**
- * The providers config `domains.providers` selects. Only the fakes can be selected: the real adapters
- * (openprovider.ts, cloudflare-saas.ts) are not wired until the accounts exist (HQ it-openprovider).
+ * The providers config `domains` selects. The registrar is only ever the fake (Openprovider waits for paid
+ * plans, M7b; registering is off). The edge is the fake or Cloudflare for SaaS from env
+ * (`cloudflareEdgeFromEnv`); without its env variables it is `unconfiguredEdge`, and the app treats
+ * connecting as unavailable. `edgeFromEnv` is passed in by the caller (cloudflare-saas.ts), keeping this
+ * module free of the adapters.
  */
-export function domainProvidersFor(providers: { registrar: "fake"; edge: "fake"; dns: "fake" | "system" }): DomainProviders {
-  const edge = fakeEdge();
+export function domainProvidersFor(
+  domains: { providers: { registrar: "fake"; edge: "fake" | "cloudflare-saas"; dns: "fake" | "system" }; connect: { cnameTarget: string } },
+  edgeFromEnv?: (cnameTarget: string) => { edge: EdgeHostnames | null; missing: string[] },
+): DomainProviders {
+  let edge: EdgeHostnames;
+  if (domains.providers.edge === "fake") edge = fakeEdge({ cnameTarget: domains.connect.cnameTarget });
+  else {
+    const real = edgeFromEnv ? edgeFromEnv(domains.connect.cnameTarget) : { edge: null, missing: ["the Cloudflare adapter"] };
+    edge = real.edge ?? unconfiguredEdge(domains.connect.cnameTarget, real.missing);
+  }
   return {
     registrar: fakeRegistrar(),
     edge,
-    dns: providers.dns === "system" ? systemDns() : fakeDns({}, { anyCnameTo: edge.cnameTarget }),
+    dns: domains.providers.dns === "system" ? systemDns() : fakeDns({}, { anyCnameTo: edge.cnameTarget }),
   };
 }
