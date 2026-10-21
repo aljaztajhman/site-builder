@@ -5,6 +5,8 @@
  * details come prefilled from the site's facts with "Uredi". One tap on the main button publishes and
  * starts the domain; its progress ("Registriramo… · Varujemo povezavo… · Objavljeno") shows in the panel.
  * Everything the owner reads is worded by the server or here in Slovene; nothing is decided here.
+ * While registering is off (config domains.register, the free beta) the step offers only "Že imam domeno":
+ * no names to buy, no prices.
  */
 
 type Child = Node | string | null | undefined | false;
@@ -29,7 +31,12 @@ export interface DomainState {
 }
 
 export interface DomainsInfo {
+  /** The step shows (connecting or registering is on). */
   enabled: boolean;
+  /** "Že imam domeno" is offered. */
+  connect: boolean;
+  /** Names to buy are offered. */
+  register: boolean;
   domains: DomainState[];
   platformAddress: string | null;
 }
@@ -93,6 +100,8 @@ export interface DomainStepDeps {
   confirm: (choice: DomainChoice) => Promise<void>;
   /** Whether the viewer's plan includes the domain in the yearly price (all paid plans today). */
   includedInPlan: boolean;
+  /** Whether names can be bought through us; when not, the step opens on "Že imam domeno" alone. */
+  canRegister: () => boolean;
 }
 
 const eur = (n: number) => `${new Intl.NumberFormat("sl-SI", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }).format(n)} €`;
@@ -100,6 +109,12 @@ const eur = (n: number) => `${new Intl.NumberFormat("sl-SI", { minimumFractionDi
 /** Loads suggestions and the holder's prefilled details, then shows the step. */
 export async function openDomainStep(d: DomainStepDeps): Promise<void> {
   const ui = d.ui;
+  if (!d.canRegister()) {
+    // Connect only: nothing to look up (the holder's details are for registering).
+    Object.assign(ui, { ...newDomainStepUi(), open: true, mode: "own" });
+    d.rerender();
+    return;
+  }
   Object.assign(ui, { ...newDomainStepUi(), open: true, loading: true });
   d.rerender();
   const [info, sugg] = await Promise.all([
@@ -207,6 +222,7 @@ function ownBlock(d: DomainStepDeps): HTMLElement {
   });
   const p = ui.own;
   return h("div", { class: "domain-own" },
+    d.canRegister() ? null : h("p", { class: "help" }, "Povežite domeno, ki jo že imate. Pri ponudniku DNS dodate en zapis, vse drugo uredimo mi."),
     h("label", {}, "Vaša domena"),
     h("div", { class: "row nowrap" }, field, h("button", { class: "btn", type: "button", id: "own-domain-check", disabled: ui.busy, onClick: () => void check() }, "Preveri")),
     ui.ownError ? h("p", { class: "err", role: "alert" }, ui.ownError) : null,

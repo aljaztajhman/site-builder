@@ -24,6 +24,7 @@ import {
   startDomain,
   DomainStartError,
   OwnDomainError,
+  REGISTER_OFF,
   type RegistrantDraft,
 } from "../src/index.ts";
 
@@ -41,7 +42,7 @@ let description: string;
 const base = loadConfig();
 const config: AppConfig = {
   ...base,
-  domains: { ...base.domains, enabled: true, retry: { baseSeconds: 30, maxSeconds: 600, maxAttempts: 3 }, waitHours: { registration: 48, dns: 72, certificate: 24 } },
+  domains: { ...base.domains, connect: { ...base.domains.connect, enabled: true }, register: { enabled: true }, retry: { baseSeconds: 30, maxSeconds: 600, maxAttempts: 3 }, waitHours: { registration: 48, dns: 72, certificate: 24 } },
 };
 
 /** The same config with the registrar's answers never reused. */
@@ -456,7 +457,7 @@ describe("starting a registration", () => {
     expect(await domainSuggestions({ repo, config: uncached, providers: p }, s.id)).toHaveLength(config.domains.suggestions.show);
     expect(checks()).toBe(3);
     // Off in config: the worker asks nothing; a registrar error is logged, not thrown.
-    await warmDomainSuggestions({ repo, config: { ...config, domains: { ...config.domains, enabled: false } }, providers: p }, s.id);
+    await warmDomainSuggestions({ repo, config: { ...config, domains: { ...config.domains, connect: { ...config.domains.connect, enabled: false }, register: { enabled: false } } }, providers: p }, s.id);
     expect(checks()).toBe(3);
     const failing = providers({ registrar: { script: { check: { fail: 5 } } } });
     const err = vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -495,5 +496,56 @@ describe("starting a registration", () => {
     const again = await startDomain(deps(providers()), s.id, { kind: "registered", hostname: "seliskar-druga-izbira.si", registrant: REGISTRANT });
     expect(again.is_primary).toBe(true);
     expect((await repo.domains.forSite(s.id)).map((d) => d.hostname)).toEqual(["seliskar-druga-izbira.si"]);
+  });
+
+  it("replacing a failed connected domain removes its custom hostname at the edge; a refusal there doesn't block the new one", async () => {
+    const s = await site();
+    const p = providers({ dns: fakeDns() });
+    const row = await startDomain(deps(p), s.id, { kind: "connected", hostname: "seliskar-stara.si" });
+    await provisionDomain(deps(p), row.hostname);
+    const hostnameId = (await repo.domains.get(row.hostname))!.detail.hostnameId;
+    expect(hostnameId).toBe("ch-www.seliskar-stara.si");
+    await repo.domains.progress(row.hostname, { status: "failed", step: "dns", failure: "dns_timeout", nextInSeconds: null });
+    await startDomain(deps(p), s.id, { kind: "connected", hostname: "seliskar-nova.si" });
+    expect(p.edge.calls.filter((c) => c.method === "removeHostname").map((c) => c.args[0])).toEqual([hostnameId]);
+    // The edge refusing the removal: logged, and the owner still gets their new domain.
+    const q = providers({ edge: { script: { removeHostname: { permanent: true } } } });
+    await repo.domains.progress("www.seliskar-nova.si", { status: "failed", step: "dns", failure: "dns_timeout", nextInSeconds: null, detail: { hostnameId: "ch-x" } });
+    const err = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const third = await startDomain(deps(q), s.id, { kind: "connected", hostname: "seliskar-tretja.si" });
+    err.mockRestore();
+    expect(third.hostname).toBe("www.seliskar-tretja.si");
+  });
+});
+
+describe("registering switched off (free beta: connect only)", () => {
+  const connectOnly: AppConfig = { ...uncached, domains: { ...uncached.domains, register: { enabled: false } } };
+  const off = (p: DomainProviders) => ({ repo, storage, config: connectOnly, providers: p });
+
+  it("offers no names and never asks the registrar, not even while the site generates", async () => {
+    const s = await site();
+    const p = providers();
+    expect(await domainSuggestions(off(p), s.id)).toEqual([]);
+    await warmDomainSuggestions(off(p), s.id);
+    expect(p.registrar.calls).toEqual([]);
+  });
+
+  it("refuses to start a registration in Slovene; connecting still starts", async () => {
+    const s = await site();
+    const p = providers();
+    await expect(startDomain(off(p), s.id, { kind: "registered", hostname: "seliskar-nakup.si", registrant: REGISTRANT })).rejects.toThrow(REGISTER_OFF);
+    const row = await startDomain(off(p), s.id, { kind: "connected", hostname: "seliskar-lastna.si" });
+    expect(row).toMatchObject({ hostname: "www.seliskar-lastna.si", kind: "connected" });
+    expect(p.registrar.calls).toEqual([]);
+  });
+
+  it("a registered row left from before is failed without a registrar call, worded for the owner", async () => {
+    const s = await site();
+    const p = providers();
+    await repo.domains.start(s.id, "seliskar-od-prej.si", "registered", { registrant: REGISTRANT });
+    expect(await provisionDomain(off(p), "seliskar-od-prej.si")).toMatchObject({ status: "failed", failure: "register_off" });
+    expect(p.registrar.calls).toEqual([]);
+    expect(p.edge.calls).toEqual([]);
+    expect(domainState((await repo.domains.get("seliskar-od-prej.si"))!, connectOnly).message).toBe(REGISTER_OFF);
   });
 });

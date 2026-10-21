@@ -14,6 +14,7 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
 process.env.ANTHROPIC_API_KEY = "";
 process.env.FAL_KEY = "";
 process.env.RESEND_API_KEY = "";
+process.env.CLOUDFLARE_API_TOKEN = "";
 
 // Re-encoding the same fixture photos to AVIF/WebP in every test file took ~10 s per fixture. Cache processPhoto's
 // output on disk across test processes, keyed by input bytes + settings + sharp build (packages/engine/src/photo-cache.ts).

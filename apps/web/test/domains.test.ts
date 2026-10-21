@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig, type AppConfig } from "@sb/config";
+import { REGISTER_OFF } from "@sb/engine";
 import { newReleaseId, writeRelease } from "@sb/engine";
 import {
   Repo,
@@ -13,6 +14,7 @@ import {
   fakeEdge,
   fakeRegistrar,
   memoryMailer,
+  unconfiguredEdge,
   migrate,
   normaliseEmail,
   type DomainProviders,
@@ -62,7 +64,7 @@ beforeAll(async () => {
   platform = { db, repo: new Repo(db), storage: createFsStorage(dir), queue, close: () => db.close() };
   golden = JSON.parse(await readFile(path.join(here, "../../../tools/eval/golden/instalacije-rebernik.json"), "utf8")) as SiteSpec;
   const base = loadConfig();
-  config = { ...base, domains: { ...base.domains, enabled: true } };
+  config = { ...base, domains: { ...base.domains, connect: { ...base.domains.connect, enabled: true }, register: { enabled: true } } };
   const edge = fakeEdge({ cnameTarget: "povezava.postavi.example" });
   providers = {
     registrar: fakeRegistrar({ taken: ["instalacijerebernik.si"] }),
@@ -76,15 +78,20 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const app = (o: { mailer?: Mailer; enabled?: boolean } = {}) =>
+const app = (o: { mailer?: Mailer; enabled?: boolean; register?: boolean; providers?: DomainProviders } = {}) =>
   createApp({
     platform,
-    config: o.enabled === false ? { ...config, domains: { ...config.domains, enabled: false } } : config,
+    config:
+      o.enabled === false
+        ? { ...config, domains: { ...config.domains, connect: { ...config.domains.connect, enabled: false }, register: { enabled: false } } }
+        : o.register === false
+          ? { ...config, domains: { ...config.domains, register: { enabled: false } } }
+          : config,
     mailer: o.mailer ?? mail,
     appUrl: "https://app.postavi.example",
     platformDomain: "postavi.example",
     siteHostCacheMs: 0,
-    domainProviders: providers,
+    domainProviders: o.providers ?? providers,
     auth: { password: PASSWORD, secret: "s".repeat(32), secureCookies: false },
   });
 
@@ -195,6 +202,36 @@ describe("the domain step's API", () => {
     expect(r.status).toBe(200);
     const state = (await (await api(admin, `/api/sites/${s.id}/domains`)).json()) as { domains: { label: string; connect: unknown }[] };
     expect(state.domains[0]).toMatchObject({ label: "Čakamo na zapis DNS…", connect: { record: { type: "CNAME", name: "www", value: "povezava.postavi.example" }, dnsHost: "Namecheap", hasMail: true, seen: [] } });
+  });
+
+  it("connect-only (the free beta): no names to buy, register requests refused in Slovene, connecting works", async () => {
+    const s = await site();
+    const a = app({ register: false });
+    const registrar = providers.registrar as ReturnType<typeof fakeRegistrar>;
+    const asked = registrar.calls.length;
+    const info = (await (await api(admin, `/api/sites/${s.id}/domains`, {}, a)).json()) as { enabled: boolean; connect: boolean; register: boolean };
+    expect(info).toMatchObject({ enabled: true, connect: true, register: false });
+    expect(await (await api(admin, `/api/sites/${s.id}/domains/suggestions`, {}, a)).json()).toEqual({ suggestions: [] });
+    const holder = { kind: "person", firstName: "Matej", lastName: "Rebernik", street: "Cesta 1", postalCode: "3000", city: "Celje", country: "SI", phone: "+38641123456", email: "info@rebernik.si" };
+    for (const body of [{ kind: "registered", hostname: "rebernik-nakup.si", registrant: holder }, { hostname: "rebernik-nakup.si" }]) {
+      const r = await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body }, a);
+      expect(r.status).toBe(409);
+      expect(await r.json()).toEqual({ error: "register_off", message: REGISTER_OFF });
+    }
+    expect(registrar.calls.length).toBe(asked);
+    const r = await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body: { kind: "connected", hostname: "rebernik-povezana.si" } }, a);
+    expect(r.status, await r.clone().text()).toBe(200);
+    expect((await platform.repo.domains.forSite(s.id)).map((d) => [d.hostname, d.kind])).toEqual([["www.rebernik-povezana.si", "connected"]]);
+    expect(registrar.calls.length).toBe(asked);
+  });
+
+  it("an edge without its credentials (Cloudflare env missing): the step is off and connecting is refused", async () => {
+    const s = await site();
+    const a = app({ register: false, providers: { ...providers, edge: unconfiguredEdge("povezava.postavi.example", ["CLOUDFLARE_API_TOKEN"]) } });
+    const info = (await (await api(admin, `/api/sites/${s.id}/domains`, {}, a)).json()) as { enabled: boolean; connect: boolean; register: boolean };
+    expect(info).toMatchObject({ enabled: false, connect: false, register: false });
+    expect((await api(admin, `/api/sites/${s.id}/domains/inspect`, { method: "POST", body: { hostname: "rebernik.si" } }, a)).status).toBe(409);
+    expect((await api(admin, `/api/sites/${s.id}/domains`, { method: "POST", body: { kind: "connected", hostname: "rebernik.si" } }, a)).status).toBe(409);
   });
 
   it("'Preveri zdaj' runs the job now; 'Poskusi znova' starts a failed domain again", async () => {

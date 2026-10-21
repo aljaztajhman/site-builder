@@ -1,4 +1,4 @@
-import type { AppConfig } from "@sb/config";
+import { domainModes, type AppConfig } from "@sb/config";
 import {
   DomainProviderError,
   type ClaimedDomain,
@@ -92,6 +92,11 @@ export async function provisionDomain(deps: ProvisionDeps, hostname: string, opt
   let step = currentStep(row);
   const detail = { ...row.detail };
   try {
+    // Registering is off (free beta, owner 2026-10-19): a registered row is never taken to the registrar.
+    if (row.kind === "registered" && !domainModes(config).register) {
+      await fail(deps, row, step, "register_off", "registering domains is switched off (config domains.register.enabled)", row.attempts);
+      return { status: "failed", step, failure: "register_off" };
+    }
     for (;;) {
       if (step === "live") {
         await goLive(deps, row);
@@ -343,7 +348,8 @@ function nameAndTown(spec: SiteSpec | null, site: { name: string; brief: unknown
  */
 export async function domainSuggestions(deps: Pick<ProvisionDeps, "repo" | "config" | "providers">, siteId: string): Promise<DomainSuggestion[]> {
   const site = await deps.repo.getSite(siteId);
-  if (!site) return [];
+  // Nothing to buy while registering is off, so the registrar isn't asked.
+  if (!site || !domainModes(deps.config).register) return [];
   const spec = (await deps.repo.getSpec(siteId))?.spec ?? null;
   const { name, town } = nameAndTown(spec, site);
   const tlds = deps.config.domains.tlds;
@@ -373,7 +379,7 @@ export async function domainSuggestions(deps: Pick<ProvisionDeps, "repo" | "conf
  * the step asks again itself.
  */
 export async function warmDomainSuggestions(deps: Pick<ProvisionDeps, "repo" | "config" | "providers">, siteId: string): Promise<void> {
-  if (!deps.config.domains.enabled) return;
+  if (!domainModes(deps.config).register) return;
   try {
     await domainSuggestions(deps, siteId);
   } catch (e) {
@@ -524,6 +530,9 @@ export async function startDomain(
   siteId: string,
   input: { kind: "registered"; hostname: string; registrant: RegistrantDraft } | { kind: "connected"; hostname: string; refuse?: readonly string[] },
 ): Promise<SiteDomainRow> {
+  const modes = domainModes(deps.config);
+  if (input.kind === "registered" && !modes.register) throw new DomainStartError(REGISTER_OFF);
+  if (input.kind === "connected" && !modes.connect) throw new DomainStartError(CONNECT_OFF);
   const existing = await deps.repo.domains.forSite(siteId);
   if (existing.some((d) => d.status !== "failed")) throw new DomainStartError("Stran že ima domeno.");
   // A failed domain that was bought, or may have been (a registration asked for, its answer unknown), is
@@ -557,7 +566,14 @@ export async function startDomain(
     hostname = plan.hostname;
     detail = { record: plan.record, dnsHost: plan.dnsHost, hasMail: plan.hasMail };
   }
-  for (const d of existing) await deps.repo.domains.remove(d.hostname);
+  for (const d of existing) {
+    // A replaced connected domain's custom hostname goes too (it would keep a slot at the edge). Best effort:
+    // a failure here mustn't keep the owner from their new domain.
+    if (d.kind === "connected" && typeof d.detail.hostnameId === "string") {
+      await deps.providers.edge.removeHostname(d.detail.hostnameId).catch((e: unknown) => console.error(`[domains] ${d.hostname}: removing the custom hostname:`, (e as Error).message));
+    }
+    await deps.repo.domains.remove(d.hostname);
+  }
   const row = await deps.repo.domains.start(siteId, hostname, input.kind, detail);
   await deps.repo.addEvent({ siteId, stage: "domain", message: `${hostname}: ${input.kind === "registered" ? "registration" : "connection"} started` });
   return row;
@@ -586,7 +602,12 @@ export interface DomainState {
   chooseAnother: boolean;
 }
 
+/** The owner's answer when registering or connecting is switched off in config. */
+export const REGISTER_OFF = "Nakupa domene pri nas še ni mogoče. Povežete lahko domeno, ki jo že imate (»Že imam domeno«).";
+export const CONNECT_OFF = "Povezovanje lastne domene še ni na voljo.";
+
 const FAILURE: Record<string, (h: string, c: AppConfig) => string> = {
+  register_off: () => REGISTER_OFF,
   unavailable: (h) => `Domena ${h} je medtem postala zasedena, zato je nismo registrirali. Izberite drugo ime.`,
   price: (h) => `Cena domene ${h} se je pri registrarju spremenila, zato je nismo registrirali. Izberite drugo ime.`,
   refused: () => "Registrar podatkov imetnika domene ni sprejel. Preverite ime, naslov, telefon in e-pošto ter poskusite znova.",

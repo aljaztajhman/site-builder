@@ -66,7 +66,7 @@ beforeAll(async () => {
   // The same data behind an app with custom domains on (fake registrar, edge and DNS): the domain step.
   const edge = fakeEdge();
   const providers = { registrar: fakeRegistrar(), edge, dns: fakeDns({}, { anyCnameTo: edge.cnameTarget }) };
-  domainBase = await listen(createApp({ platform, config: { ...config, domains: { ...config.domains, enabled: true } }, domainProviders: providers, auth }));
+  domainBase = await listen(createApp({ platform, config: { ...config, domains: { ...config.domains, connect: { ...config.domains.connect, enabled: true }, register: { enabled: true } } }, domainProviders: providers, auth }));
   cookie = await adminCookie((p, init) => fetch(`${base}${p}`, init), PASSWORD);
   cb = await launchCheckBrowser();
 }, 120_000);

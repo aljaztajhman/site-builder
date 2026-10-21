@@ -1,6 +1,7 @@
 import type { Hono } from "hono";
-import type { AppConfig } from "@sb/config";
+import { domainModes, type AppConfig } from "@sb/config";
 import {
+  CONNECT_OFF,
   DomainStartError,
   OwnDomainError,
   REGISTRANT_LABEL,
@@ -9,10 +10,11 @@ import {
   domainSuggestions,
   planOwnDomain,
   registrantFromSpec,
+  REGISTER_OFF,
   registrantMissing,
   startDomain,
 } from "@sb/engine";
-import { normaliseHostname, type DomainProviders, type Queue, type Repo } from "@sb/platform";
+import { UNCONFIGURED_EDGE, normaliseHostname, type DomainProviders, type Queue, type Repo } from "@sb/platform";
 import { formatPhone } from "@sb/spec";
 import { publishRefusal, refusalJson, type AppEnv } from "./access.ts";
 
@@ -20,7 +22,8 @@ import { publishRefusal, refusalJson, type AppEnv } from "./access.ts";
  * The domain step of publishing (it-domain-flow): names to buy from the business name with their price
  * (config), the holder's details prefilled from the site's facts, "Že imam domeno" with the exact record
  * to add, and each domain's progress in Slovene. Provisioning itself runs in the worker (queue "domain").
- * Registering and connecting are publishing rights (paid plans and the admin).
+ * Registering and connecting are publishing rights (paid plans and the admin). Each has its own switch
+ * (config `domains.connect`, `domains.register`); in the free beta only connecting is on (owner, 2026-10-19).
  */
 
 export interface DomainRouteDeps {
@@ -36,12 +39,22 @@ export interface DomainRouteDeps {
 /** "Ponudbe domen trenutno ne moremo preveriti" and the like: the registrar didn't answer. */
 export const SUGGESTIONS_UNAVAILABLE = "Prostih domen trenutno ne moremo preveriti. Poskusite znova čez nekaj minut ali povežite domeno, ki jo že imate.";
 
+/**
+ * What the domain step may offer: connecting needs the switch and a configured edge (Cloudflare for SaaS
+ * without its env variables can't add hostnames); registering needs its switch. `enabled`: the step shows.
+ */
+export function domainOffer(d: Pick<DomainRouteDeps, "config" | "providers">): { enabled: boolean; connect: boolean; register: boolean } {
+  const modes = domainModes(d.config);
+  const connect = modes.connect && d.providers.edge.kind !== UNCONFIGURED_EDGE;
+  return { enabled: connect || modes.register, connect, register: modes.register };
+}
+
 /** The site's domains as the owner reads them, and whether the step is on. Also part of the editor's state. */
-export async function domainsInfo(d: Pick<DomainRouteDeps, "repo" | "config" | "platformDomain">, siteId: string, slug: string) {
+export async function domainsInfo(d: Pick<DomainRouteDeps, "repo" | "config" | "providers" | "platformDomain">, siteId: string, slug: string) {
   const rows = await d.repo.domains.forSite(siteId);
   const platform = d.platformDomain ? normaliseHostname(d.platformDomain) : null;
   return {
-    enabled: d.config.domains.enabled,
+    ...domainOffer(d),
     // Only the names that serve the site on their own; a registered domain's www redirects to it.
     domains: rows.filter((r) => !(r.status === "active" && !r.is_primary && typeof r.detail.redirectsTo === "string")).map((r) => domainState(r, d.config)),
     platformAddress: platform ? `https://${slug}.${platform}/` : null,
@@ -75,7 +88,8 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
   });
 
   app.get("/api/sites/:id/domains/suggestions", async (c) => {
-    if (!config.domains.enabled) return c.json({ suggestions: [] });
+    // Names to buy: none while registering is off (the registrar isn't asked).
+    if (!domainOffer(d).register) return c.json({ suggestions: [] });
     try {
       return c.json({ suggestions: await domainSuggestions({ repo, config, providers }, c.req.param("id")) });
     } catch (e) {
@@ -90,7 +104,7 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
   app.post("/api/sites/:id/domains/inspect", async (c) => {
     const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
-    if (!config.domains.enabled) return c.json({ error: "disabled", message: "Lastne domene še niso na voljo." }, 409);
+    if (!domainOffer(d).connect) return c.json({ error: "disabled", message: CONNECT_OFF }, 409);
     const body = (await c.req.json().catch(() => ({}))) as { hostname?: unknown };
     try {
       return c.json(await planOwnDomain({ providers }, String(body.hostname ?? ""), { refuse: refuse() }));
@@ -103,9 +117,13 @@ export function registerDomainRoutes(app: Hono<AppEnv>, d: DomainRouteDeps): voi
   app.post("/api/sites/:id/domains", async (c) => {
     const denied = publishRefusal(c.get("viewer"), config);
     if (denied) return refusalJson(c, denied);
-    if (!config.domains.enabled) return c.json({ error: "disabled", message: "Lastne domene še niso na voljo." }, 409);
+    const offer = domainOffer(d);
+    if (!offer.enabled) return c.json({ error: "disabled", message: "Lastne domene še niso na voljo." }, 409);
     const id = c.req.param("id");
     const body = (await c.req.json().catch(() => ({}))) as { kind?: unknown; hostname?: unknown; registrant?: unknown };
+    // Anything but "connected" asks us to buy a name: refused while registering is off.
+    if (body.kind !== "connected" && !offer.register) return c.json({ error: "register_off", message: REGISTER_OFF }, 409);
+    if (body.kind === "connected" && !offer.connect) return c.json({ error: "disabled", message: CONNECT_OFF }, 409);
     const hostname = String(body.hostname ?? "");
     try {
       const row =

@@ -194,6 +194,8 @@ const domainDeps: DomainStepDeps = {
   rerender: () => render(),
   // Every paid plan includes the domain in the yearly price (config plans.*.yearlyIncludesDomain).
   includedInPlan: true,
+  // Off in the free beta (config domains.register): the step offers only "Že imam domeno".
+  canRegister: () => state.domains?.register === true,
   confirm: (choice) => publishWithDomain(choice),
 };
 
@@ -297,7 +299,7 @@ const freeViewer = (): boolean => state.access?.viewer === "anonymous" || state.
  */
 let freeDomain: string | null | undefined;
 async function freeDomainLookup(): Promise<void> {
-  if (freeDomain !== undefined || !state.spec || !state.domains?.enabled || !freeViewer()) return;
+  if (freeDomain !== undefined || !state.spec || !state.domains?.register || !freeViewer()) return;
   freeDomain = null;
   try {
     freeDomain = (await api<{ suggestions: { name: string }[] }>("/domains/suggestions")).suggestions[0]?.name ?? null;
