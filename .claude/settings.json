@@ -14,6 +14,16 @@
             "statusMessage": "Checking the agent-team rules"
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-endless-wait.mjs\"",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionStart": [
