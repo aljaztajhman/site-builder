@@ -8,6 +8,8 @@ import type { Db } from "./db.ts";
 
 /** The name the worker's heartbeat is stored under. */
 export const WORKER_HEARTBEAT = "worker";
+/** The name the worker's own bucket check is stored under when it passes (the web's /health checks only the web's key). */
+export const WORKER_STORAGE_HEARTBEAT = "worker-storage";
 /** The name under which the last paid call refused by the daily spend cap is stored (the cap refuses before spend reaches it). */
 export const SPEND_CAP_REFUSAL = "spend-cap-refusal";
 
@@ -65,5 +67,21 @@ export class OpsState {
       [since.toISOString()],
     );
     return Number(rows[0]?.n ?? 0);
+  }
+
+  /**
+   * The last `n` job failures the sites logged since `since`, newest first: the failed-jobs alert says why. Only the
+   * worker's job errors (stage error or edit), with the technical cause after the owner's line when the event carries
+   * one (a lost picture's bucket error is in data.reason); junk refusals (data.isBusiness) aren't failures.
+   */
+  async recentFailures(since: Date, n: number): Promise<string[]> {
+    const { rows } = await this.db.query<{ message: string }>(
+      `select case when data->>'reason' is not null then message || ' (' || (data->>'reason') || ')' else message end as message
+         from site_events
+        where level = 'error' and stage in ('error', 'edit') and not (coalesce(data, '{}'::jsonb) ? 'isBusiness') and created_at >= $1
+        order by created_at desc, id desc limit $2`,
+      [since.toISOString(), n],
+    );
+    return rows.map((r) => r.message);
   }
 }

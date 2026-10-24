@@ -8,6 +8,7 @@ import {
   ImageGenerator,
   JunkIntakeError,
   ModelClient,
+  PicturesLostError,
   PictureLimitError,
   allowancePeriod,
   limitBreach,
@@ -34,7 +35,7 @@ import {
   type SpendLedger,
   type UrlCheckResult,
 } from "@sb/engine";
-import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, domainProvidersFromEnv, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
+import { INTERRUPTED_MESSAGE, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, WORKER_STORAGE_HEARTBEAT, domainProvidersFromEnv, mailerFromEnv, renderInvoiceHtml, type DomainProviders, type Mailer, type Platform, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired, spendMonitor } from "./housekeeping.ts";
 import { sendInvoiceDocuments, type InvoiceDocumentDeps } from "./invoices.ts";
@@ -45,6 +46,38 @@ const EDIT_ERROR_REPLY = "Sprememba ni uspela, stran je ostala nespremenjena. Po
 const EDIT_SPEND_CAP_REPLY = "Današnja omejitev porabe pomočnika je dosežena, zato sprememba ni bila narejena. Jutri spet deluje; do takrat stran urejate neposredno.";
 /** A description the classifier couldn't place (shown on the generation screen). */
 export const JUNK_REPLY = "Iz opisa ne znamo razbrati, kakšno podjetje imate. Napišite, kaj ponujate, kje ste in kako vas dosežejo, in poskusite znova.";
+
+/** A generation whose generated pictures were all lost (not made, or the bucket refused them): shown on the generation screen. */
+export const PICTURES_LOST_REPLY = "Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili. Poskusite znova čez nekaj minut.";
+
+/**
+ * The worker's own bucket check: `storage.ping()`, and on success the WORKER_STORAGE_HEARTBEAT the admin alerts watch
+ * (worker-storage). The web service's /health pings with the web's own key, so a stale key on the worker alone
+ * (22 Oct 2026) went unnoticed. A failure is logged once until the check passes again; a bucket that doesn't answer
+ * within `timeoutMs` (config alerts.checkTimeoutMs) fails it, so hung checks don't pile up on the heartbeat.
+ */
+export function storageCheck(storage: Pick<Platform["storage"], "ping">, ops: Pick<OpsState, "beat">, timeoutMs: number): () => Promise<boolean> {
+  let failing = false;
+  return async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        storage.ping(),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error(`no answer within ${timeoutMs / 1000} s`)), timeoutMs);
+        }),
+      ]).finally(() => clearTimeout(timer));
+    } catch (e) {
+      if (!failing) console.error("[worker] storage check failed; generated pictures, published sites and backups can't be stored:", (e as Error).message);
+      failing = true;
+      return false;
+    }
+    if (failing) console.log("[worker] storage check passes again");
+    failing = false;
+    await ops.beat(WORKER_STORAGE_HEARTBEAT).catch((e: unknown) => console.error("[worker] storage heartbeat", e));
+    return true;
+  };
+}
 
 /** Whose model calls these are: the site and queue job, and for the limits the tier, account and ai_jobs row. */
 export interface CallContext {
@@ -270,8 +303,10 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
   // A sign of life for the admin alerts (apps/web/src/alerts.ts): no heartbeat for alerts.workerSilentMinutes emails the owner.
   const ops = new OpsState(platform.db);
   const beat = () => ops.beat(WORKER_HEARTBEAT).catch((e: unknown) => console.error("[worker] heartbeat", e));
+  const checkStorage = storageCheck(storage, ops, config.alerts.checkTimeoutMs);
   await beat();
-  timers.push(setInterval(() => void beat(), config.alerts.heartbeatSeconds * 1000));
+  await checkStorage();
+  timers.push(setInterval(() => void beat().then(checkStorage), config.alerts.heartbeatSeconds * 1000));
 
   if (config.imageGen.pipeline.enabled && !process.env.FAL_KEY && !process.env.MODEL_REPLAY_DIR) {
     console.warn("[worker] FAL_KEY not set: sites with too few photos get no generated pictures");
@@ -373,6 +408,18 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
         await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: JUNK_REPLY, data: { confidence: e.confidence, isBusiness: e.isBusiness } });
         await finish(ctx.aiJobId, "refused");
         await telemetry({ outcome: "refused", saved: false, error: e });
+        return;
+      }
+      if (e instanceof PicturesLostError) {
+        // No text-only site instead: the owner sees why, and the failed-jobs alert counts it. A failed job isn't counted
+        // as a generation (usage counts queued and done); pictures fal already billed still count toward a paid plan's
+        // monthly pictures (Usage.generatedPictures counts billed calls). The pipeline checks the bucket before paying
+        // for any picture, so a broken bucket key fails here without that cost.
+        console.error("[generate]", e);
+        await repo.setStatus(job.siteId, "failed");
+        await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: PICTURES_LOST_REPLY, data: { lost: e.lost, wanted: e.wanted, reason: e.reason } });
+        await finish(ctx.aiJobId, "failed");
+        await telemetry({ outcome: "failed", saved: false, error: e });
         return;
       }
       console.error("[generate]", e);

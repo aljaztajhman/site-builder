@@ -1,5 +1,5 @@
 import type { AppConfig } from "@sb/config";
-import { OpsState, SPEND_CAP_REFUSAL, Usage, WORKER_HEARTBEAT, type Mailer, type Platform } from "@sb/platform";
+import { OpsState, SPEND_CAP_REFUSAL, Usage, WORKER_HEARTBEAT, WORKER_STORAGE_HEARTBEAT, type Mailer, type Platform } from "@sb/platform";
 
 /**
  * Admin alerts: the owner hears about trouble by email within one check interval, without another account.
@@ -7,7 +7,8 @@ import { OpsState, SPEND_CAP_REFUSAL, Usage, WORKER_HEARTBEAT, type Mailer, type
  * ALERT_EMAIL, and without it nothing runs. Plain English, subject "Postavi alert: …".
  *
  * Kinds: health (the /health checks: database, storage, queue), failed-jobs (generation and chat-edit jobs failed in
- * the last window; jobs the spend cap stopped are "refused", not failed), worker-silent (no worker heartbeat),
+ * the last window, with the last failures' messages; jobs the spend cap stopped are "refused", not failed), worker-silent
+ * (no worker heartbeat), worker-storage (the worker's own bucket check hasn't passed: its key can differ from the web's),
  * spend-warning (today's model spend at a share of the daily cap) and spend-cap (the cap reached, or a call refused
  * by it today: the cap refuses a call whose estimate doesn't fit, so spend can stay just under it). A kind that keeps
  * failing emails again only after its cooldown; the spend kinds once per UTC day. A kind that was emailed and clears
@@ -16,7 +17,7 @@ import { OpsState, SPEND_CAP_REFUSAL, Usage, WORKER_HEARTBEAT, type Mailer, type
  * has a time limit (a hung database or bucket counts as failing), and a round still running skips the next one.
  */
 
-export type AlertKind = "health" | "failed-jobs" | "worker-silent" | "spend-warning" | "spend-cap";
+export type AlertKind = "health" | "failed-jobs" | "worker-silent" | "worker-storage" | "spend-warning" | "spend-cap";
 
 type HealthDeps = Pick<Platform, "db" | "storage" | "queue">;
 
@@ -84,8 +85,13 @@ export function alertWatchdog(deps: AlertDeps) {
   // Fallback state when the database is unreachable (it is the likeliest reason for a health alert).
   const memory = new Map<string, { sentAt: Date; firing: boolean }>();
 
-  const cooldownMs = (kind: AlertKind) =>
-    60_000 * (kind === "health" ? a.cooldownMinutes.health : kind === "failed-jobs" ? a.cooldownMinutes.failedJobs : a.cooldownMinutes.workerSilent);
+  const cooldownMinutes: Record<Exclude<AlertKind, "spend-warning" | "spend-cap">, number> = {
+    health: a.cooldownMinutes.health,
+    "failed-jobs": a.cooldownMinutes.failedJobs,
+    "worker-silent": a.cooldownMinutes.workerSilent,
+    "worker-storage": a.cooldownMinutes.workerStorage,
+  };
+  const cooldownMs = (kind: AlertKind) => 60_000 * (SPEND_KINDS.has(kind) ? 0 : cooldownMinutes[kind as keyof typeof cooldownMinutes]);
 
   async function stateOf(kind: AlertKind): Promise<{ sentAt: Date; firing: boolean } | null> {
     try {
@@ -121,21 +127,33 @@ export function alertWatchdog(deps: AlertDeps) {
       const n = await limit("failed jobs", ops.failedJobsSince(since));
       checked.add("failed-jobs");
       if (n >= a.failedJobs.threshold) {
+        // Why, in the email itself: the last errors the sites logged (a lost bucket key reads the same on every one).
+        const why = await limit("recent failures", ops.recentFailures(since, 3)).catch((e: unknown) => {
+          log(`[alerts] recent failures: ${(e as Error).message}`);
+          return [] as string[];
+        });
         firing.push({
           kind: "failed-jobs",
           title: `${n} jobs failed in the last ${a.failedJobs.windowMinutes} minutes`,
-          detail: `${n} generation or chat-edit jobs failed between ${since.toISOString()} and ${at.toISOString()} (alert from ${a.failedJobs.threshold}).\nThe worker log and /admin/costs show which stage failed.`,
+          detail: [
+            `${n} generation or chat-edit jobs failed between ${since.toISOString()} and ${at.toISOString()} (alert from ${a.failedJobs.threshold}).`,
+            ...(why.length ? ["The last errors the sites logged:", ...why.map((m) => `- ${m.slice(0, 200)}`)] : []),
+            "The worker log and /admin/costs show which stage failed.",
+          ].join("\n"),
         });
       }
     } catch (e) {
       log(`[alerts] failed-jobs check: ${(e as Error).message}`);
     }
 
+    // A silent worker checks no bucket either: worker-silent says it all, and worker-storage waits until it beats.
+    let workerRuns = false;
     try {
       const beat = await limit("worker heartbeat", ops.lastBeat(WORKER_HEARTBEAT));
       checked.add("worker-silent");
       const silentMs = a.workerSilentMinutes * 60_000;
-      if (!beat || at.getTime() - beat.getTime() >= silentMs) {
+      workerRuns = !!beat && at.getTime() - beat.getTime() < silentMs;
+      if (!workerRuns) {
         const ago = beat ? `${Math.round((at.getTime() - beat.getTime()) / 60_000)} minutes ago (${beat.toISOString()})` : "never";
         firing.push({
           kind: "worker-silent",
@@ -145,6 +163,25 @@ export function alertWatchdog(deps: AlertDeps) {
       }
     } catch (e) {
       log(`[alerts] worker heartbeat check: ${(e as Error).message}`);
+    }
+
+    if (workerRuns) {
+      try {
+        const passed = await limit("worker storage check", ops.lastBeat(WORKER_STORAGE_HEARTBEAT));
+        checked.add("worker-storage");
+        if (!passed || at.getTime() - passed.getTime() >= a.workerSilentMinutes * 60_000) {
+          firing.push({
+            kind: "worker-storage",
+            title: "the worker can't reach its bucket",
+            detail: [
+              `The worker's bucket check has not passed since ${passed ? passed.toISOString() : "it started (never)"}; generated pictures, published sites and backups can't be stored by the worker.`,
+              "Compare the worker's S3_* variables on Railway with the web service's (the web's /health storage check passes with its own key).",
+            ].join("\n"),
+          });
+        }
+      } catch (e) {
+        log(`[alerts] worker storage check: ${(e as Error).message}`);
+      }
     }
 
     try {
@@ -204,7 +241,7 @@ export function alertWatchdog(deps: AlertDeps) {
     }
     // Kinds that were emailed and now pass: one "resolved" email each (the spend ones reset with the day instead).
     const firingNow = new Set(firing.map((f) => f.kind));
-    for (const kind of ["health", "failed-jobs", "worker-silent"] as const) {
+    for (const kind of ["health", "failed-jobs", "worker-silent", "worker-storage"] as const) {
       if (firingNow.has(kind) || !checked.has(kind)) continue;
       const s = await stateOf(kind);
       if (!s?.firing) continue;

@@ -464,7 +464,13 @@ export const AppConfigSchema = z.object({
     failedJobs: z.object({ windowMinutes: z.number().int().positive(), threshold: z.number().int().positive() }),
     /** Share of the daily spend cap at which the warning goes out (the cap itself is a second alert). */
     spendWarnShare: z.number().gt(0).lt(1),
-    cooldownMinutes: z.object({ health: z.number().int().positive(), failedJobs: z.number().int().positive(), workerSilent: z.number().int().positive() }),
+    cooldownMinutes: z.object({
+      health: z.number().int().positive(),
+      failedJobs: z.number().int().positive(),
+      workerSilent: z.number().int().positive(),
+      /** The worker's own bucket check (worker-storage) has not passed for `workerSilentMinutes`. */
+      workerStorage: z.number().int().positive(),
+    }),
   }),
   targets: z.object({
     homepagePreviewEur: z.number(),
@@ -482,7 +488,15 @@ export const AppConfigSchema = z.object({
     /** Report-only first-screen targets for the eval (see config $comment). */
     composition: z.object({ mobile: CompositionTarget, desktop: CompositionTarget }),
   }),
-  images: z.object({ widths: z.array(z.number().int().positive()), avifQuality: z.number(), webpQuality: z.number() }),
+  images: z.object({
+    widths: z.array(z.number().int().positive()),
+    avifQuality: z.number(),
+    webpQuality: z.number(),
+    /** Extra tries of each bucket write of a generated picture (it was paid for) before it counts as lost. */
+    storeRetries: z.number().int().min(0),
+    /** Wait between those tries. */
+    storeRetryDelayMs: z.number().int().min(0),
+  }),
   /** Spec version retention: the nightly prune job (see config $comment). */
   versions: z.object({
     retention: z.object({

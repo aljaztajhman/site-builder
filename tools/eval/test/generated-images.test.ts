@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
-import { ImageGenerator, ModelClient, ReplayTransport, StandInImageTransport, generateSite, launchCheckBrowser, loadMedia, type CallRecord, type CheckBrowser, type Recording } from "@sb/engine";
-import { Repo, createDb, createFsStorage, migrate, type Db, type SiteRow } from "@sb/platform";
+import { ImageGenerator, ModelClient, PicturesLostError, ReplayTransport, StandInImageTransport, generateSite, launchCheckBrowser, loadMedia, type CallRecord, type CheckBrowser, type Recording } from "@sb/engine";
+import { Repo, createDb, createFsStorage, migrate, type Db, type SiteRow, type Storage } from "@sb/platform";
 import { renderPage } from "@sb/render";
 import { migrateSpec, validateSite, type SiteSpec } from "@sb/spec";
 import { loadFixture } from "../src/fixtures/load.ts";
@@ -56,10 +56,37 @@ function recordings(id: string, golden: SiteSpec, heroImage: string | null): Rec
   });
 }
 
-async function run(id: string, photos: number, heroImage: string | null, opts: { slug?: string; again?: { site: SiteRow; stand: StandInImageTransport }; pictures?: { max?: number; note?: string } } = {}) {
+/**
+ * The bucket as the worker saw it on 22 Oct 2026 (a stale key): every write whose key `refuses` fails, the first
+ * `times` times (Infinity: always). `puts` counts the attempts per key.
+ */
+function refusingStorage(inner: Storage, refuses: (key: string) => boolean, times = Infinity) {
+  const puts = new Map<string, number>();
+  const storage: Storage = {
+    ...inner,
+    put: async (key, data, type) => {
+      const n = (puts.get(key) ?? 0) + 1;
+      puts.set(key, n);
+      if (refuses(key) && n <= times) throw new Error("The request signature we calculated does not match the signature you provided");
+      return inner.put(key, data, type);
+    },
+  };
+  return { storage, puts };
+}
+
+/** No real waiting between the retries in tests. */
+const fastRetries = { ...config, images: { ...config.images, storeRetryDelayMs: 1 } };
+
+async function run(
+  id: string,
+  photos: number,
+  heroImage: string | null,
+  opts: { slug?: string; again?: { site: SiteRow; stand: StandInImageTransport }; pictures?: { max?: number; note?: string }; storage?: (fs: Storage) => Storage } = {},
+) {
   const again = opts.again;
   const golden = migrateSpec(JSON.parse(await readFile(path.join(here, `../golden/${id}.json`), "utf8"))) as SiteSpec;
-  const storage = createFsStorage(path.join(dir, id));
+  const fsStorage = createFsStorage(path.join(dir, id));
+  const storage = opts.storage ? opts.storage(fsStorage) : fsStorage;
   const site = again?.site ?? (await repo.createSite({ name: id, slug: opts.slug ?? id, intake: { description: loadFixture(id).brief.description, photoAssetIds: [], scope: "home" } }));
   if (photos && !again) {
     const ids: string[] = [];
@@ -75,7 +102,7 @@ async function run(id: string, photos: number, heroImage: string | null, opts: {
   const client = new ModelClient({ config, transport: new ReplayTransport(recordings(id, golden, heroImage)), spentToday: async () => 0, onCall });
   const stand = again?.stand ?? new StandInImageTransport();
   const images = new ImageGenerator({ config, transport: stand, spentToday: async () => 0, onCall });
-  await generateSite({ config, repo, storage, client, browser, lighthouse: false, images, ...(opts.pictures ? { pictures: opts.pictures } : {}) }, site.id, null);
+  await generateSite({ config: opts.storage ? fastRetries : config, repo, storage, client, browser, lighthouse: false, images, ...(opts.pictures ? { pictures: opts.pictures } : {}) }, site.id, null);
   const spec = (await repo.getSpec(site.id))!.spec;
   return { spec, calls, stand, storage, site };
 }
@@ -149,6 +176,83 @@ describe("generated images for sites with too few photos", () => {
     const events = await db.query<{ message: string }>("select message from site_events where site_id = $1", [first.site.id]);
     expect(events.rows.map((e) => e.message)).toContain("Reused 2 generated picture(s) of the previous version (this month's pictures are used up)");
   }, 300_000);
+
+  it("fails the job when every generated picture is lost (the bucket refuses them): no text-only site, the reason in the log", async () => {
+    const site = await repo.createSite({ name: "lost", slug: "slike-izgubljene", intake: { description: loadFixture("instalacije-rebernik").brief.description, photoAssetIds: [], scope: "home" } });
+    let puts: Map<string, number> | undefined;
+    const attempt = run("instalacije-rebernik", 0, "img_g1", {
+      again: { site, stand: new StandInImageTransport() },
+      storage: (fs) => {
+        const r = refusingStorage(fs, (key) => key.includes("/generated/") || /\/media\/img_g/.test(key));
+        puts = r.puts;
+        return r.storage;
+      },
+    });
+    await expect(attempt).rejects.toBeInstanceOf(PicturesLostError);
+    await expect(attempt).rejects.toMatchObject({ lost: 2, wanted: 2, reason: expect.stringContaining("signature") });
+    expect(await repo.getSpec(site.id)).toBeNull();
+    // Each original was tried 1 + storeRetries times before the picture counted as lost.
+    expect(puts!.get(`sites/${site.id}/generated/img_g1.jpg`)).toBe(1 + config.images.storeRetries);
+    const events = await db.query<{ message: string; level: string; data: unknown }>("select message, level, data from site_events where site_id = $1 and stage = 'imageGen'", [site.id]);
+    expect(events.rows.filter((e) => e.message.endsWith("not generated; building without it")).map((e) => [e.level, e.data])).toEqual([
+      ["warn", expect.stringContaining("signature")],
+      ["warn", expect.stringContaining("signature")],
+    ]);
+    expect(events.rows.map((e) => e.message)).toContain("0 of 2 generated images");
+  }, 180_000);
+
+  it("retries a refused bucket write: a picture stored on the second try is kept", async () => {
+    let puts: Map<string, number> | undefined;
+    const { spec, site } = await run("instalacije-rebernik", 0, "img_g1", {
+      slug: "slike-drugi-poskus",
+      storage: (fs) => {
+        const r = refusingStorage(fs, (key) => key.endsWith("/generated/img_g1.jpg"), 1);
+        puts = r.puts;
+        return r.storage;
+      },
+    });
+    expect(puts!.get(`sites/${site.id}/generated/img_g1.jpg`)).toBe(2);
+    expect(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id)).toEqual(["img_g1", "img_g2"]);
+  }, 180_000);
+
+  it("checks the bucket before paying for any picture: a refused key fails the job with no picture made", async () => {
+    const site = await repo.createSite({ name: "ping", slug: "slike-kljuc", intake: { description: loadFixture("instalacije-rebernik").brief.description, photoAssetIds: [], scope: "home" } });
+    const stand = new StandInImageTransport();
+    const attempt = run("instalacije-rebernik", 0, "img_g1", {
+      again: { site, stand },
+      storage: (fs) => ({ ...fs, ping: async () => Promise.reject(new Error("The request signature we calculated does not match the signature you provided")) }),
+    });
+    await expect(attempt).rejects.toMatchObject({ name: "PicturesLostError", wanted: 2, reason: expect.stringContaining("signature") });
+    expect(stand.calls).toBe(0);
+    expect(await repo.getSpec(site.id)).toBeNull();
+  }, 180_000);
+
+  it("retries a refused variant write too: a picture whose variants store on the second try is kept", async () => {
+    let puts: Map<string, number> | undefined;
+    const { spec, site } = await run("instalacije-rebernik", 0, "img_g1", {
+      slug: "slike-razlicice",
+      storage: (fs) => {
+        const r = refusingStorage(fs, (key) => /\/media\/img_g1[^/]*$/.test(key), 1);
+        puts = r.puts;
+        return r.storage;
+      },
+    });
+    const variantPuts = [...puts!.entries()].filter(([key]) => key.startsWith(`sites/${site.id}/media/img_g1`));
+    expect(variantPuts.length).toBeGreaterThan(0);
+    expect(variantPuts.every(([, n]) => n === 2)).toBe(true);
+    expect(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id)).toEqual(["img_g1", "img_g2"]);
+  }, 180_000);
+
+  it("builds with what arrived when only some pictures are lost, with a warning", async () => {
+    const { spec, site } = await run("instalacije-rebernik", 0, "img_g1", {
+      slug: "slike-ena-izgubljena",
+      storage: (fs) => refusingStorage(fs, (key) => key.includes("/generated/img_g2") || key.includes("/media/img_g2")).storage,
+    });
+    expect(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id)).toEqual(["img_g1"]);
+    expect(validateSite(spec).ok).toBe(true);
+    const events = await db.query<{ message: string; level: string }>("select message, level from site_events where site_id = $1 and stage = 'imageGen'", [site.id]);
+    expect(events.rows).toEqual(expect.arrayContaining([{ message: "Image 2 not generated; building without it", level: "warn" }, { message: "1 of 2 generated images", level: "warn" }]));
+  }, 180_000);
 
   it("generates nothing when the owner gave enough photos, even with ideas in the brief", async () => {
     const { spec, calls, stand } = await run("pekarna-kvas", 3, null);

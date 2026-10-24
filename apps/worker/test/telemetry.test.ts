@@ -4,12 +4,12 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig, type AppConfig } from "@sb/config";
-import { JunkIntakeError, SpendCapError, type GenerateResult } from "@sb/engine";
+import { JunkIntakeError, PicturesLostError, SpendCapError, type GenerateResult } from "@sb/engine";
 import { Repo, createDb, createFsStorage, migrate, type GenerationProps, type JobData, type Platform, type Queue, type Tier } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
 import { cleanupExpired } from "../src/housekeeping.ts";
 import { checkNames, recordGeneration } from "../src/telemetry.ts";
-import { startWorker, type WorkerJobs } from "../src/worker.ts";
+import { PICTURES_LOST_REPLY, startWorker, type WorkerJobs } from "../src/worker.ts";
 
 /**
  * Engine telemetry (docs/plans/analytics.md Step 3) with config analytics.events on: every generation job writes one
@@ -199,6 +199,22 @@ describe("a generation job's events", () => {
     await handlers.generate!({ siteId: admin.siteId, scope: "home", aiJobId: admin.aiJobId }, "job-admin");
     expect((await generationOf(admin.siteId))!.tier).toBe("admin");
     expect(await platform.repo.events.list({ kind: "preview_ready" })).toEqual([]);
+  });
+
+  it("all generated pictures lost: the site fails with a Slovene reason, the job is failed (not counted), no text-only site", async () => {
+    const lost = await siteWithJob("free");
+    generate = async () => {
+      throw new PicturesLostError(2, 2, "The request signature we calculated does not match the signature you provided");
+    };
+    await handlers.generate!({ siteId: lost.siteId, scope: "home", aiJobId: lost.aiJobId }, "job-lost");
+    expect((await platform.repo.getSite(lost.siteId))?.status).toBe("failed");
+    expect((await platform.repo.getSite(lost.siteId))?.current_version).toBeNull();
+    const error = (await platform.repo.listEvents(lost.siteId)).find((e) => e.level === "error")!;
+    expect(error.message).toBe(PICTURES_LOST_REPLY);
+    expect(error.message).toMatch(/[čšž]|Poskusite/);
+    expect(error.data).toEqual({ lost: 2, wanted: 2, reason: "The request signature we calculated does not match the signature you provided" });
+    expect((await platform.repo.usage.getJob(lost.aiJobId))?.status).toBe("failed");
+    expect((await generationOf(lost.siteId))!.p).toMatchObject({ outcome: "failed", error: "PicturesLostError" });
   });
 
   it("writes nothing with analytics.events off", async () => {

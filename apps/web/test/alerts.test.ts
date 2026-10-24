@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig, type AppConfig } from "@sb/config";
-import { MIGRATIONS, OpsState, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, createDb, createFsStorage, memoryMailer, migrate, type Db, type MailMessage, type Mailer, type Queue, type Storage } from "@sb/platform";
+import { MIGRATIONS, OpsState, Repo, SPEND_CAP_REFUSAL, WORKER_HEARTBEAT, WORKER_STORAGE_HEARTBEAT, createDb, createFsStorage, memoryMailer, migrate, type Db, type MailMessage, type Mailer, type Queue, type Storage } from "@sb/platform";
 import { alertWatchdog, startAlerts } from "../src/alerts.ts";
 
 /**
@@ -70,7 +70,11 @@ function watchdog(c: ReturnType<typeof clock>, mailer: Mailer = memoryMailer(), 
 }
 
 const subjects = (m: { sent: MailMessage[] }) => m.sent.map((x) => x.subject);
-const beat = (at: Date) => new OpsState(real).beat(WORKER_HEARTBEAT, at);
+/** A running worker: its heartbeat and its own bucket check (it writes both on every beat). */
+const beat = async (at: Date, storageOk = true) => {
+  await new OpsState(real).beat(WORKER_HEARTBEAT, at);
+  if (storageOk) await new OpsState(real).beat(WORKER_STORAGE_HEARTBEAT, at);
+};
 
 async function failedJob(finishedAt: Date, started = true, status: "failed" | "refused" = "failed"): Promise<void> {
   await real.query(
@@ -191,6 +195,53 @@ describe("alert watchdog", () => {
     c.advance(windowMinutes);
     await beat(c.now());
     expect(await w.check()).toEqual(["failed-jobs:resolved"]);
+  });
+
+  it("failed jobs: the email names the last errors the sites logged", async () => {
+    const c = clock();
+    await beat(c.now());
+    const mail = memoryMailer();
+    const { w } = watchdog(c, mail);
+    const repo = new Repo(real);
+    const site = await repo.createSite({ name: "Gostilna", slug: `gostilna-${Date.now()}`, intake: { description: "x", photoAssetIds: [], scope: "home" } });
+    await repo.addEvent({ siteId: site.id, stage: "error", level: "error", message: "Iz opisa ne znamo razbrati, kakšno podjetje imate.", data: { confidence: 0.2, isBusiness: false } });
+    await repo.addEvent({ siteId: site.id, stage: "error", level: "error", message: "Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili.", data: { lost: 2, wanted: 2, reason: "The request signature we calculated does not match" } });
+    await repo.addEvent({ siteId: site.id, stage: "imageGen", level: "warn", message: "Image 1 not generated; building without it" });
+    await repo.addEvent({ siteId: site.id, stage: "retention", level: "error", message: "Picture sweep failed: something else" });
+    for (let i = 0; i < config.alerts.failedJobs.threshold; i++) await failedJob(new Date(c.now().getTime() - MIN));
+    expect(await w.check()).toEqual(["failed-jobs"]);
+    // The cause, not only the owner's line; no junk refusal, warning or housekeeping error in its place.
+    expect(mail.sent[0]!.text).toContain("The last errors the sites logged:\n- Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili. (The request signature we calculated does not match)");
+    expect(mail.sent[0]!.text).not.toContain("Image 1 not generated");
+    expect(mail.sent[0]!.text).not.toContain("Iz opisa");
+    expect(mail.sent[0]!.text).not.toContain("Picture sweep");
+  });
+
+  it("worker storage: fires when the worker's own bucket check never passed or is stale, resolves when it passes; a silent worker is only worker-silent", async () => {
+    const c = clock();
+    const mail = memoryMailer();
+    const { w } = watchdog(c, mail);
+    // The worker runs, but its bucket check never passed (a stale S3 key on the worker only).
+    await beat(c.now(), false);
+    expect(await w.check()).toEqual(["worker-storage"]);
+    expect(mail.sent[0]!.subject).toBe("Postavi alert: the worker can't reach its bucket");
+    expect(mail.sent[0]!.text).toContain("has not passed since it started (never)");
+    expect(mail.sent[0]!.text).toContain("Compare the worker's S3_* variables on Railway");
+
+    c.advance(1);
+    await beat(c.now());
+    expect(await w.check()).toEqual(["worker-storage:resolved"]);
+
+    // Passed once, then stale for workerSilentMinutes while the worker keeps beating.
+    const passedAt = c.now();
+    c.advance(config.alerts.workerSilentMinutes);
+    await beat(c.now(), false);
+    expect(await w.check()).toEqual(["worker-storage"]);
+    expect(mail.sent.at(-1)!.text).toContain(`has not passed since ${passedAt.toISOString()}`);
+
+    // The worker itself stops: one alert for it, not a second for its bucket.
+    c.advance(config.alerts.workerSilentMinutes + config.alerts.cooldownMinutes.workerStorage);
+    expect(await w.check()).toEqual(["worker-silent"]);
   });
 
   it("worker silent: no heartbeat at all, or none for workerSilentMinutes; resolved when it beats again", async () => {
