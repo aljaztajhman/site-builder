@@ -69,10 +69,17 @@ export class OpsState {
     return Number(rows[0]?.n ?? 0);
   }
 
-  /** The messages of the last `n` error-level site events since `since`, newest first: the failed-jobs alert says why. */
+  /**
+   * The last `n` job failures the sites logged since `since`, newest first: the failed-jobs alert says why. Only the
+   * worker's job errors (stage error or edit), with the technical cause after the owner's line when the event carries
+   * one (a lost picture's bucket error is in data.reason); junk refusals (data.isBusiness) aren't failures.
+   */
   async recentFailures(since: Date, n: number): Promise<string[]> {
     const { rows } = await this.db.query<{ message: string }>(
-      "select message from site_events where level = 'error' and created_at >= $1 order by created_at desc, id desc limit $2",
+      `select case when data->>'reason' is not null then message || ' (' || (data->>'reason') || ')' else message end as message
+         from site_events
+        where level = 'error' and stage in ('error', 'edit') and not (coalesce(data, '{}'::jsonb) ? 'isBusiness') and created_at >= $1
+        order by created_at desc, id desc limit $2`,
       [since.toISOString(), n],
     );
     return rows.map((r) => r.message);

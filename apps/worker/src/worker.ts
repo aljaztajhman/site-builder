@@ -411,8 +411,10 @@ export async function startWorker(platform: Platform, config = loadConfig(), job
         return;
       }
       if (e instanceof PicturesLostError) {
-        // No text-only site instead: the owner sees why, the failed-jobs alert counts it, and a failed job doesn't
-        // use up the allowance (usage counts queued and done).
+        // No text-only site instead: the owner sees why, and the failed-jobs alert counts it. A failed job isn't counted
+        // as a generation (usage counts queued and done); pictures fal already billed still count toward a paid plan's
+        // monthly pictures (Usage.generatedPictures counts billed calls). The pipeline checks the bucket before paying
+        // for any picture, so a broken bucket key fails here without that cost.
         console.error("[generate]", e);
         await repo.setStatus(job.siteId, "failed");
         await repo.addEvent({ siteId: job.siteId, jobId, stage: "error", level: "error", message: PICTURES_LOST_REPLY, data: { lost: e.lost, wanted: e.wanted, reason: e.reason } });

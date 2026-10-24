@@ -4,7 +4,7 @@ import { contentType } from "@sb/platform";
 import { mediaFiles, siteFiles, exportZip, shareImageOf, variantFile, variantWidths } from "@sb/render";
 import { blockerText, direction as directionById, keepUnchangedOwnerEdits, publishChecklist, templateFor, validateSite, type ImageAsset, type PublishBlocker, type SiteSpec } from "@sb/spec";
 import type { Operation } from "fast-json-patch";
-import { ModelOutputError, SpendCapError, type ModelClient } from "./llm/client.ts";
+import { ModelOutputError, PictureLimitError, SpendCapError, type ModelClient } from "./llm/client.ts";
 import { classify, makeBrief, chooseDesign, altTexts, generateContent, critique, applyPatches, editSpec, drawsInsteadOfPhotos, type VarietyInput } from "./stages.ts";
 import { keyOf, lookKey, siteSeed } from "./variety.ts";
 import { conceptPlan } from "./concept.ts";
@@ -196,6 +196,8 @@ export async function generateSite(deps: PipelineDeps, siteId: string, jobId: st
     if (slots.skipped) await log("imageGen", slots.skipped);
     if (slots.limited && deps.pictures?.note) await log("imageGen", deps.pictures.note, { planLimit: true, wanted: slots.limited.wanted, made: slots.wanted });
     const ideas = brief.imageIdeas.slice(0, slots.wanted);
+    // Pictures were wanted but the brief named none to make: the site is built without them, so say so.
+    if (slots.wanted > 0 && !ideas.length) await log("imageGen", `The brief gave no picture ideas; building without the ${slots.wanted} generated picture(s) this site could have`, undefined, "warn");
     const template = templateFor(brief.businessType, photos.length + ideas.length + reuse.length);
     const waitForDesign = ideas.length > 0 && template !== undefined && drawsInsteadOfPhotos(template);
     const startImages = (): Promise<ImageAsset[]> => (ideas.length ? stageTime("imageGen", () => generateImages(deps, siteId, ideas, log, stop)) : Promise.resolve([]));
@@ -488,7 +490,15 @@ export function generatedImageCount(
  */
 async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log, stop: AbortController): Promise<ImageAsset[]> {
   const { config, storage, repo } = deps;
-  const store = (key: string, data: Uint8Array, type: string) => putWithRetry(storage, key, data, type, config.images.storeRetries, config.images.storeRetryDelayMs);
+  // The bucket first: a refused key (22 Oct 2026) would lose every picture after fal billed it, on every retry.
+  try {
+    await storage.ping();
+  } catch (e) {
+    const why = String((e as Error)?.message ?? e).slice(0, 300);
+    await log("imageGen", "Bucket check failed before any picture was made; none were paid for", why, "warn");
+    throw new PicturesLostError(ideas.length, ideas.length, why);
+  }
+  const store = (key: string, data: Uint8Array, type: string) => putWithRetry(storage, key, data, type, config.images.storeRetries, config.images.storeRetryDelayMs, stop.signal);
   // Fresh ids on every generation: the version this one replaces keeps its own pictures (restore shows them).
   const ids = await claimImageIds(repo, siteId, "generated", ideas.length, (await repo.getSpec(siteId))?.spec.assets.images ?? []);
   const results = await Promise.allSettled(
@@ -516,29 +526,35 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
   if (stop.signal.aborted) throw stop.signal.reason;
   const out: ImageAsset[] = [];
   let reason = "";
+  let lost = 0;
   for (const [i, r] of results.entries()) {
     if (r.status === "fulfilled") out.push(r.value);
     else if (r.reason instanceof SpendCapError) throw r.reason;
+    // The plan's monthly pictures ran out under a parallel job: nothing was billed and a retry wouldn't make it, so it
+    // isn't a lost picture (the job builds with what it has).
+    else if (r.reason instanceof PictureLimitError) await log("imageGen", `Image ${i + 1} not made: ${r.reason.message.slice(0, 200)}`, undefined, "warn");
     else {
+      lost++;
       const why = String((r.reason as Error)?.message ?? r.reason).slice(0, 300);
       reason ||= why;
       await log("imageGen", `Image ${i + 1} not generated; building without it`, why, "warn");
     }
   }
   await log("imageGen", `${out.length} of ${ideas.length} generated images`, out.map((o) => ({ id: o.id, alt: o.alt })), out.length < ideas.length ? "warn" : undefined);
-  if (ideas.length > 0 && out.length === 0) throw new PicturesLostError(ideas.length, ideas.length, reason);
+  if (out.length === 0 && lost > 0) throw new PicturesLostError(lost, ideas.length, reason);
   return out;
 }
 
-/** `storage.put`, tried `1 + retries` times `delayMs` apart; the last failure is thrown. */
-async function putWithRetry(storage: Storage, key: string, data: Uint8Array, type: string, retries: number, delayMs: number): Promise<void> {
+/** `storage.put`, tried `1 + retries` times `delayMs` apart; the last failure is thrown. A stopped job stops retrying. */
+async function putWithRetry(storage: Storage, key: string, data: Uint8Array, type: string, retries: number, delayMs: number, signal: AbortSignal): Promise<void> {
   for (let attempt = 0; ; attempt++) {
     try {
       await storage.put(key, data, type);
       return;
     } catch (e) {
-      if (attempt >= retries) throw e;
+      if (attempt >= retries || signal.aborted) throw e;
       await new Promise((resolve) => setTimeout(resolve, delayMs));
+      signal.throwIfAborted();
     }
   }
 }

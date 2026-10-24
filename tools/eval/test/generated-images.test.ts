@@ -215,6 +215,34 @@ describe("generated images for sites with too few photos", () => {
     expect(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id)).toEqual(["img_g1", "img_g2"]);
   }, 180_000);
 
+  it("checks the bucket before paying for any picture: a refused key fails the job with no picture made", async () => {
+    const site = await repo.createSite({ name: "ping", slug: "slike-kljuc", intake: { description: loadFixture("instalacije-rebernik").brief.description, photoAssetIds: [], scope: "home" } });
+    const stand = new StandInImageTransport();
+    const attempt = run("instalacije-rebernik", 0, "img_g1", {
+      again: { site, stand },
+      storage: (fs) => ({ ...fs, ping: async () => Promise.reject(new Error("The request signature we calculated does not match the signature you provided")) }),
+    });
+    await expect(attempt).rejects.toMatchObject({ name: "PicturesLostError", wanted: 2, reason: expect.stringContaining("signature") });
+    expect(stand.calls).toBe(0);
+    expect(await repo.getSpec(site.id)).toBeNull();
+  }, 180_000);
+
+  it("retries a refused variant write too: a picture whose variants store on the second try is kept", async () => {
+    let puts: Map<string, number> | undefined;
+    const { spec, site } = await run("instalacije-rebernik", 0, "img_g1", {
+      slug: "slike-razlicice",
+      storage: (fs) => {
+        const r = refusingStorage(fs, (key) => /\/media\/img_g1[^/]*$/.test(key), 1);
+        puts = r.puts;
+        return r.storage;
+      },
+    });
+    const variantPuts = [...puts!.entries()].filter(([key]) => key.startsWith(`sites/${site.id}/media/img_g1`));
+    expect(variantPuts.length).toBeGreaterThan(0);
+    expect(variantPuts.every(([, n]) => n === 2)).toBe(true);
+    expect(spec.assets.images.filter((i) => i.origin === "generated").map((i) => i.id)).toEqual(["img_g1", "img_g2"]);
+  }, 180_000);
+
   it("builds with what arrived when only some pictures are lost, with a warning", async () => {
     const { spec, site } = await run("instalacije-rebernik", 0, "img_g1", {
       slug: "slike-ena-izgubljena",

@@ -204,12 +204,17 @@ describe("alert watchdog", () => {
     const { w } = watchdog(c, mail);
     const repo = new Repo(real);
     const site = await repo.createSite({ name: "Gostilna", slug: `gostilna-${Date.now()}`, intake: { description: "x", photoAssetIds: [], scope: "home" } });
-    await repo.addEvent({ siteId: site.id, stage: "error", level: "error", message: "Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili." });
+    await repo.addEvent({ siteId: site.id, stage: "error", level: "error", message: "Iz opisa ne znamo razbrati, kakšno podjetje imate.", data: { confidence: 0.2, isBusiness: false } });
+    await repo.addEvent({ siteId: site.id, stage: "error", level: "error", message: "Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili.", data: { lost: 2, wanted: 2, reason: "The request signature we calculated does not match" } });
     await repo.addEvent({ siteId: site.id, stage: "imageGen", level: "warn", message: "Image 1 not generated; building without it" });
+    await repo.addEvent({ siteId: site.id, stage: "retention", level: "error", message: "Picture sweep failed: something else" });
     for (let i = 0; i < config.alerts.failedJobs.threshold; i++) await failedJob(new Date(c.now().getTime() - MIN));
     expect(await w.check()).toEqual(["failed-jobs"]);
-    expect(mail.sent[0]!.text).toContain("The last errors the sites logged:\n- Slik za stran ni bilo mogoče pripraviti");
+    // The cause, not only the owner's line; no junk refusal, warning or housekeeping error in its place.
+    expect(mail.sent[0]!.text).toContain("The last errors the sites logged:\n- Slik za stran ni bilo mogoče pripraviti, zato strani nismo ustvarili. (The request signature we calculated does not match)");
     expect(mail.sent[0]!.text).not.toContain("Image 1 not generated");
+    expect(mail.sent[0]!.text).not.toContain("Iz opisa");
+    expect(mail.sent[0]!.text).not.toContain("Picture sweep");
   });
 
   it("worker storage: fires when the worker's own bucket check never passed or is stale, resolves when it passes; a silent worker is only worker-silent", async () => {
