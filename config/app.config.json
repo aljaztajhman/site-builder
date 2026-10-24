@@ -171,14 +171,14 @@
     "retryWithinHours": 23
   },
   "alerts": {
-    "$comment": "Admin alerts by email to ALERT_EMAIL (off when unset), plain English, subject 'Postavi alert: …'. The web service checks every everyMinutes: /health's checks (database, storage, queue), generation/edit jobs failed in the last failedJobs.windowMinutes (at least threshold), no worker heartbeat for workerSilentMinutes (the worker writes one every heartbeatSeconds), today's model spend at spendWarnShare of the daily cap, and the cap reached. The cap also counts as reached when it refused a call today (it refuses a call whose estimate doesn't fit, so spend can stay just under it); jobs it stopped are 'refused', not failed. Each kind at most once per cooldownMinutes while it keeps failing (the spend ones once per UTC day); a kind that clears sends one 'resolved' email, and its next failure alerts at once. Each check and query has checkTimeoutMs (also /health's); a check still running skips the next. Sent alerts are stored (ops_alerts), so a restart doesn't resend.",
+    "$comment": "Admin alerts by email to ALERT_EMAIL (off when unset), plain English, subject 'Postavi alert: …'. The web service checks every everyMinutes: /health's checks (database, storage, queue), generation/edit jobs failed in the last failedJobs.windowMinutes (at least threshold), no worker heartbeat for workerSilentMinutes (the worker writes one every heartbeatSeconds), the worker's own bucket check not passed for workerSilentMinutes (worker-storage: it checks on start and every heartbeat), today's model spend at spendWarnShare of the daily cap, and the cap reached. The cap also counts as reached when it refused a call today (it refuses a call whose estimate doesn't fit, so spend can stay just under it); jobs it stopped are 'refused', not failed. Each kind at most once per cooldownMinutes while it keeps failing (the spend ones once per UTC day); a kind that clears sends one 'resolved' email, and its next failure alerts at once. Each check and query has checkTimeoutMs (also /health's); a check still running skips the next. Sent alerts are stored (ops_alerts), so a restart doesn't resend.",
     "everyMinutes": 5,
     "checkTimeoutMs": 10000,
     "heartbeatSeconds": 60,
     "workerSilentMinutes": 10,
     "failedJobs": { "windowMinutes": 60, "threshold": 3 },
     "spendWarnShare": 0.8,
-    "cooldownMinutes": { "health": 60, "failedJobs": 180, "workerSilent": 60 }
+    "cooldownMinutes": { "health": 60, "failedJobs": 180, "workerSilent": 60, "workerStorage": 60 }
   },
   "targets": {
     "homepagePreviewEur": 0.3,
@@ -196,7 +196,14 @@
       "desktop": { "minImageShareWithPhotos": 0.3, "maxButtons": 3, "maxHeadlineLines": 3, "maxGapPx": 160 }
     }
   },
-  "images": { "widths": [360, 720, 1080, 1600], "avifQuality": 55, "webpQuality": 72 },
+  "images": {
+    "$comment": "storeRetries/storeRetryDelayMs: a generated picture's bucket writes are tried 1 + storeRetries times, storeRetryDelayMs apart, before the picture counts as lost (it was paid for). A generation that loses all its generated pictures fails instead of building a text-only site.",
+    "widths": [360, 720, 1080, 1600],
+    "avifQuality": 55,
+    "webpQuality": 72,
+    "storeRetries": 2,
+    "storeRetryDelayMs": 500
+  },
   "versions": {
     "$comment": "Spec version retention (owner's decision sb-autosave-versions = prune, 2026-10-01). Every editor autosave stores a full version. A nightly job (cron, read in timeZone) keeps every version from today and the keepAllDays whole days before it, then only the last version of each older day, plus every version that was ever published and the current one. Versions never change; files only pruned versions used are removed with them.",
     "retention": { "keepAllDays": 7, "timeZone": "Europe/Ljubljana", "cron": "30 3 * * *" }

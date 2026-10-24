@@ -57,6 +57,21 @@ export class JunkIntakeError extends Error {
   }
 }
 
+/**
+ * Every generated picture of the job was lost (made but not stored, or not made): the job fails rather than build a
+ * text-only site the owner didn't ask for (22 Oct 2026: a stale bucket key turned a restaurant into a white page).
+ */
+export class PicturesLostError extends Error {
+  constructor(
+    readonly lost: number,
+    readonly wanted: number,
+    readonly reason: string,
+  ) {
+    super(`All ${wanted} generated picture(s) were lost; stopped instead of building without them: ${reason}`);
+    this.name = "PicturesLostError";
+  }
+}
+
 export const mediaKey = (siteId: string, file: string) => `sites/${siteId}/media/${file}`;
 export const uploadKey = (siteId: string, assetId: string) => `sites/${siteId}/uploads/${assetId}`;
 
@@ -81,10 +96,10 @@ export async function clientCorpus(repo: Repo, siteId: string): Promise<string> 
   return [site?.intake.description ?? "", ...chat.filter((c) => c.role === "user").map((c) => c.content), ...typed].join("\n");
 }
 
-type Log = (stage: string, message: string, data?: unknown) => Promise<void>;
+type Log = (stage: string, message: string, data?: unknown, level?: "warn") => Promise<void>;
 
 function logger(repo: Repo, siteId: string, jobId: string | null): Log {
-  return (stage, message, data) => repo.addEvent({ siteId, jobId, stage, message, data });
+  return (stage, message, data, level) => repo.addEvent({ siteId, jobId, stage, message, data, ...(level ? { level } : {}) });
 }
 
 async function timed<T>(log: Log, stage: string, fn: () => Promise<T>): Promise<T> {
@@ -466,12 +481,14 @@ export function generatedImageCount(
 
 /**
  * One generated image per idea, stored and processed like an upload, marked `origin: "generated"` so the
- * site labels it and validation keeps it to hero and image-text slots. A failed image is logged and
- * skipped; the site is built from what arrived. The spend cap still stops the job, and `stop` (the job
- * failed, or the cap stopped another picture) keeps the ones not yet sent from starting.
+ * site labels it and validation keeps it to hero and image-text slots. A failed image is logged as a warning and
+ * skipped; the site is built from what arrived, unless nothing did (PicturesLostError). The spend cap still stops
+ * the job, and `stop` (the job failed, or the cap stopped another picture) keeps the ones not yet sent from starting.
+ * Each bucket write is retried (config images.storeRetries): the picture is already paid for.
  */
 async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subject: string; alt: string }[], log: Log, stop: AbortController): Promise<ImageAsset[]> {
   const { config, storage, repo } = deps;
+  const store = (key: string, data: Uint8Array, type: string) => putWithRetry(storage, key, data, type, config.images.storeRetries, config.images.storeRetryDelayMs);
   // Fresh ids on every generation: the version this one replaces keeps its own pictures (restore shows them).
   const ids = await claimImageIds(repo, siteId, "generated", ideas.length, (await repo.getSpec(siteId))?.spec.assets.images ?? []);
   const results = await Promise.allSettled(
@@ -488,9 +505,9 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
       // site that won't use it.
       stop.signal.throwIfAborted();
       const key = `sites/${siteId}/generated/${id}.jpg`;
-      await storage.put(key, img.data, "image/jpeg");
+      await store(key, img.data, "image/jpeg");
       const processed = await processPhoto(id, img.data, config.images.widths, { avif: config.images.avifQuality, webp: config.images.webpQuality });
-      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => storage.put(mediaKey(siteId, v.file), v.data, contentType(v.file)));
+      await mapLimit(processed.variants, STORAGE_CONCURRENCY, (v) => store(mediaKey(siteId, v.file), v.data, contentType(v.file)));
       // One event per picture as it lands, so the editor's live preview shows each one at once.
       await log("imageGen", "Image ready", { id, alt: idea.alt.slice(0, 180) });
       return { id, src: key, width: processed.width, height: processed.height, alt: idea.alt.slice(0, 180), origin: "generated" };
@@ -498,13 +515,32 @@ async function generateImages(deps: PipelineDeps, siteId: string, ideas: { subje
   );
   if (stop.signal.aborted) throw stop.signal.reason;
   const out: ImageAsset[] = [];
+  let reason = "";
   for (const [i, r] of results.entries()) {
     if (r.status === "fulfilled") out.push(r.value);
     else if (r.reason instanceof SpendCapError) throw r.reason;
-    else await log("imageGen", `Image ${i + 1} not generated; building without it`, String((r.reason as Error)?.message ?? r.reason).slice(0, 300));
+    else {
+      const why = String((r.reason as Error)?.message ?? r.reason).slice(0, 300);
+      reason ||= why;
+      await log("imageGen", `Image ${i + 1} not generated; building without it`, why, "warn");
+    }
   }
-  await log("imageGen", `${out.length} of ${ideas.length} generated images`, out.map((o) => ({ id: o.id, alt: o.alt })));
+  await log("imageGen", `${out.length} of ${ideas.length} generated images`, out.map((o) => ({ id: o.id, alt: o.alt })), out.length < ideas.length ? "warn" : undefined);
+  if (ideas.length > 0 && out.length === 0) throw new PicturesLostError(ideas.length, ideas.length, reason);
   return out;
+}
+
+/** `storage.put`, tried `1 + retries` times `delayMs` apart; the last failure is thrown. */
+async function putWithRetry(storage: Storage, key: string, data: Uint8Array, type: string, retries: number, delayMs: number): Promise<void> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await storage.put(key, data, type);
+      return;
+    } catch (e) {
+      if (attempt >= retries) throw e;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
 }
 
 export class PublishBlockedError extends Error {

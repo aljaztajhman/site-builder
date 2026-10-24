@@ -4,9 +4,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadConfig } from "@sb/config";
-import { OpsState, Repo, WORKER_HEARTBEAT, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
+import { OpsState, Repo, WORKER_HEARTBEAT, WORKER_STORAGE_HEARTBEAT, createDb, createFsStorage, migrate, type JobData, type Platform, type Queue } from "@sb/platform";
 import type { SiteSpec } from "@sb/spec";
-import { startWorker } from "../src/worker.ts";
+import { startWorker, storageCheck } from "../src/worker.ts";
 
 /**
  * The worker's job handlers against a real (in-memory) database. The model is a replay transport with no
@@ -67,6 +67,33 @@ describe("heartbeat (admin alerts)", () => {
     await ops.beat(WORKER_HEARTBEAT, later);
     await ops.beat(WORKER_HEARTBEAT, first!);
     expect((await ops.lastBeat(WORKER_HEARTBEAT))!.getTime()).toBe(later.getTime());
+  });
+});
+
+describe("the worker's own bucket check (worker-storage alert)", () => {
+  it("passes at start: the storage beat is written", async () => {
+    const at = await new OpsState(platform.db).lastBeat(WORKER_STORAGE_HEARTBEAT);
+    expect(at).not.toBeNull();
+    expect(Date.now() - at!.getTime()).toBeLessThan(5 * 60_000);
+  });
+
+  it("beats when ping resolves, not when it rejects or hangs", async () => {
+    const beats: string[] = [];
+    const ops = { beat: async (name: string) => void beats.push(name) };
+    let ping: () => Promise<void> = async () => undefined;
+    const check = storageCheck({ ping: () => ping() }, ops, 50);
+    expect(await check()).toBe(true);
+    expect(beats).toEqual([WORKER_STORAGE_HEARTBEAT]);
+    ping = async () => {
+      throw new Error("The request signature we calculated does not match the signature you provided");
+    };
+    expect(await check()).toBe(false);
+    ping = () => new Promise<void>(() => undefined);
+    expect(await check()).toBe(false);
+    expect(beats).toHaveLength(1);
+    ping = async () => undefined;
+    expect(await check()).toBe(true);
+    expect(beats).toHaveLength(2);
   });
 });
 
