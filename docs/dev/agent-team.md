@@ -31,7 +31,7 @@ These are the starting rules from research. Which model gets which kind of unit 
 |---|---|---|---|---|---|
 | **Fable 5.1** | $10 / $50 | the hardest and longest-running work: root causes, outages, architecture | a **project's** overall design and structure at its start (a new product area, a new system); the most high-level, cross-cutting architecture decisions, when needed | high | phase design or review, escalation, building, reading, review; anything without a `FABLE: project-design` or `FABLE: architecture` line |
 | **Opus 5.5** | $4 / $20 | complex reasoning, long agentic coding, judgment | the director; building code; design taste (stances, references, drawings); reviews | medium by default; high for design taste, review, bugs in existing code; **xhigh** for phase design, phase review, ceiling decisions and escalation (the architect); **never low or max** | reading, searching, mechanical edits |
-| **Sonnet 5.5** | $2 / $10 | daily coding at medium effort | the **implementer**: makes failing tests pass against an interface Opus (or Fable) fixed; well-specified, test-covered units; the fallback when the Opus-specific limit is hit; measured against Opus builders | medium only | open design, units without tests to aim at, high or max effort (token-hungry) |
+| **Sonnet 5.5** | $2 / $10 | daily coding at medium effort | practically unused (owner, 2026-11-24): only simple work that needs no judgment, is beyond Haiku, and would otherwise cost Opus usage; the fallback when the Opus-specific limit is hit | medium only | implementation, review, open design, high or max effort (token-hungry) |
 | **Haiku 5.5** | $0.10 / $0.50 | high-volume reading, extraction, classification, sub-agent tasks | scouts (map code, read logs, summarise reports, research the web); mechanical edits from an exact list; running checks and reporting | medium | judgment, design, deciding what to build |
 
 ## 3. Roles
@@ -44,7 +44,7 @@ These are the starting rules from research. Which model gets which kind of unit 
 | **Mechanic** | `.claude/agents/mechanic.md` | Haiku 5.5, medium; own worktree | mechanical work from an exact list: download and subset files, register a list of assets, rename across files, run a sheet and report | decides what or how |
 | **Asset maker** | `.claude/agents/asset-maker.md` | Opus 5.5, medium; high where taste is the job | designs inventory assets (drawings, palettes, compositions, stances) | approves its own assets |
 | **Reviewer** | `.claude/agents/reviewer.md` | Opus 5.5, high; read-only | reviews a diff against plan and brief: correctness and requirements only | edits; style comments |
-| **Implementer** | `.claude/agents/implementer.md` | Sonnet 5.5, medium; own worktree | makes the failing tests of a fixed interface pass; reports with evidence | changes the interface or the tests (stops and reports instead) |
+| **Implementer** | `.claude/agents/implementer.md` | Opus 5.5, medium; own worktree | makes the failing tests of a fixed interface pass; reports with evidence | changes the interface or the tests (stops and reports instead) |
 | **Architect** | `.claude/agents/architect.md` | Opus 5.5, xhigh | phase design (writes the design file), phase review, the product's ceiling decisions, escalation; answers with decisions and their reasons | builds or reviews routine work |
 | **Strategist** | `architect` with `model: fable` and a `FABLE:` line | Fable 5.1, high | a project's overall design and structure at its start; the highest-level architecture decisions | anything at phase level or below |
 
@@ -58,7 +58,7 @@ These are the starting rules from research. Which model gets which kind of unit 
 | **Fan-out with verification** (Workflow) | many workers, each verified | 8 or more similar units; only when the owner asks for a workflow |
 | **Best of N for taste** | 2–3 Opus drafts at medium, the director picks and merges the best parts | where quality is taste and the asset sets the bar (references, a stance deck) |
 | **Bookends: the architect designs and reviews, builders build, Haiku reads** | at a phase's start the architect (Opus xhigh) writes the design (interfaces, schemas, risks, the order of units) into a file in the repo; scouts map; Opus builders and Sonnet implementers build; at the end the architect reviews the whole phase diff before it merges. Fable only once per project, for its overall design | every phase of the design studio and any change with long consequences; one design and one review call per phase |
-| **Opus specs, Sonnet implements** | Opus writes the interface and failing tests; a Sonnet implementer makes them pass; the director verifies | large but well-specified units, where most of the work is filling in |
+| **Opus specs, implementer fills in** | Opus writes the interface and failing tests; an Opus implementer makes them pass; the director verifies | large but well-specified units, where most of the work is filling in |
 | **Escalation ladder** | Opus medium → Opus high → architect (Opus xhigh) | after two failed attempts on the same problem (the "two strikes" rule) |
 
 ## 5. Triage: every task gets a mode first
@@ -125,7 +125,7 @@ Tests share an on-disk cache of processed fixture photos (`node_modules/.cache/s
 - **The director's context is the biggest consumer.** Delegate reading to scouts; `/compact` with instructions at phase boundaries; don't re-read large files.
 - On this machine at most **3** builders, mechanics or asset makers run at once (each installs and runs tests). Scouts are read-only and don't count.
 - Effort medium unless §2 says otherwise; only medium, high and xhigh; never low or max.
-- Fable: every call has a `FABLE:` line naming its purpose (`project-design` or `architecture`), normally once per project; the log counts them and the PR's agent setup line says what each bought. A phase design on Fable used over 200k tokens before writing anything (2026-10-10), so phase work goes to the architect on Opus xhigh. If the owner sees Fable billing usage credits, the HQ budget note says how much per month.
+- Fable: every call needs the owner's approval in chat first (owner, 2026-11-24), never writes code, and has a `FABLE:` line naming its purpose (`project-design` or `architecture`), normally once per project; the log counts them and the PR's agent setup line says what each bought. A phase design on Fable used over 200k tokens before writing anything (2026-10-10), so phase work goes to the architect on Opus xhigh. If the owner sees Fable billing usage credits, the HQ budget note says how much per month.
 - If the Opus-specific limit is hit, switch the session to Sonnet (medium) and keep going; if the session or weekly limit is hit, stop and schedule the continuation.
 - Workflow agents (`agent()` inside a Workflow script) bypass the Agent hook. Their scripts must set `model` and `effort` per `agent()` call by this table.
 
@@ -137,7 +137,7 @@ Tests share an on-disk cache of processed fixture photos (`node_modules/.cache/s
 | Inventory batches I1–I7, I9 | D/W | scout maps the registry once (shared map); an asset maker (Opus) designs or picks; mechanics (Haiku) download, subset, register and run sheets; the director curates; the owner approves in the gallery |
 | I8 stances, I10 references | D | asset makers on Opus high, best of N where the bar is set; no reviewer (taste goes to the owner via Okus and the gallery) |
 | F1b composition language v2 | S, then D | the director settles schemas; scout map; builders for guards and renderer; reviewer (spec change) |
-| S0–S6 the studio (paid) | D | architect designs the stages and prompts; scout map per stage; Opus builders, Sonnet implementers for test-covered stages; **only the director runs paid evals**; architect reviews the phase |
+| S0–S6 the studio (paid) | D | architect designs the stages and prompts; scout map per stage; Opus builders and implementers; **only the director runs paid evals**; architect reviews the phase |
 | S7 owner screens | D | scout map of the editor; builders; browser checks at 360 and 1280 px |
 | Phase 3 measuring | S | the director runs the eval; scouts summarise the reports |
 
