@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Stranko's agent-team procedure (docs/dev/agent-team.md). Use before starting any non-trivial task and before every Agent launch — triage the task (mode S/D/W), pick roles and models (Opus + Haiku, Sonnet only as implementer, Fable only for a project's overall design; effort medium, high or xhigh), map with a Haiku scout before any builder, write the brief, verify every touched package, record the setup. Not optional: the PreToolUse hook rejects agent launches without an explicit model or a MODE line.
+description: Stranko's agent-team procedure (docs/dev/agent-team.md). Use before starting any non-trivial task and before every Agent launch — triage the task (mode S/D/W), pick roles and models (Opus + Haiku, Sonnet practically unused, Fable only for a project's overall design with the owner's approval each time; effort medium, high or xhigh), map with a Haiku scout before any builder, write the brief, verify every touched package, record the setup. Not optional: the PreToolUse hook rejects agent launches without an explicit model or a MODE line.
 ---
 
 # Delegate (Stranko agent team)
@@ -24,9 +24,9 @@ Write the status line first: `Mode D · score 4/5 · team: scout(haiku) → 2 bu
 | build a unit of code | `builder` | opus · medium (high for bugs in existing code or tricky migrations) |
 | design assets (taste) | `asset-maker` | opus · medium; high when the asset sets the bar |
 | review a diff | `reviewer` | opus · high |
-| make failing tests pass against a fixed interface | `implementer` | sonnet · medium |
+| make failing tests pass against a fixed interface | `implementer` | opus · medium |
 | phase design (bookend), phase review (bookend), the product's ceiling decisions, escalation after two failed attempts | `architect` | opus · xhigh |
-| a project's overall design and structure at its start; the highest-level architecture decisions (rare, about once per project) | `architect` with `model: fable` | fable · high, `FABLE: project-design|architecture` line |
+| a project's overall design and structure at its start; the highest-level architecture decisions (rare, about once per project) | `architect` with `model: fable` | fable · high, `FABLE: project-design|architecture` line, and the owner's approval in chat first |
 
 Never: the built-in **Explore** (runs on Opus), `general-purpose` without an explicit `model`, **low** or **max** effort (only medium, high, xhigh), Sonnet above medium, Fable for phase-level work, building or reading.
 
